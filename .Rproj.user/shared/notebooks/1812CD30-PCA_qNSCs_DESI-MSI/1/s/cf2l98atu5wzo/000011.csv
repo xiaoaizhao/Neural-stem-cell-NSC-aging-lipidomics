@@ -1,0 +1,72 @@
+"0","data.table("
+"0","  PC=gfapCastPCADT[,.N,variable]$variable,"
+"0","  pv=sapply("
+"0","    lapply(gfapCastPCADT[,.N,variable]$variable,"
+"0","           function(i){"
+"0","             wilcox.test(gfapCastPCADT[variable==i][class==1]$value,"
+"0","                         gfapCastPCADT[variable==i][class==0]$value)"
+"0","           }),function(j) j$p.value),"
+"0","  "
+"0","  auc=sapply(gfapCastPCADT[,.N,variable]$variable,"
+"0","             function(i){"
+"0","               roc(gfapCastPCADT[variable==i]$class,"
+"0","                   gfapCastPCADT[variable==i]$value)$auc"
+"0","             })"
+"0","  "
+"0",")[,fdr:=p.adjust(pv)][order(pv)]"
+"2","Setting levels: control = 0, case = 1
+"
+"2","Setting direction: controls < cases
+"
+"2","Setting levels: control = 0, case = 1
+"
+"2","Setting direction: controls < cases
+"
+"2","Setting levels: control = 0, case = 1
+"
+"2","Setting direction: controls < cases
+"
+"2","Setting levels: control = 0, case = 1
+"
+"2","Setting direction: controls > cases
+"
+"2","Setting levels: control = 0, case = 1
+"
+"2","Setting direction: controls < cases
+"
+"2","Setting levels: control = 0, case = 1
+"
+"2","Setting direction: controls < cases
+"
+"2","Setting levels: control = 0, case = 1
+"
+"2","Setting direction: controls > cases
+"
+"2","Setting levels: control = 0, case = 1
+"
+"2","Setting direction: controls > cases
+"
+"2","Setting levels: control = 0, case = 1
+"
+"2","Setting direction: controls < cases
+"
+"2","Setting levels: control = 0, case = 1
+"
+"2","Setting direction: controls < cases
+"
+"2","Setting levels: control = 0, case = 1
+"
+"2","Setting direction: controls > cases
+"
+"2","Setting levels: control = 0, case = 1
+"
+"2","Setting direction: controls > cases
+"
+"2","Setting levels: control = 0, case = 1
+"
+"2","Setting direction: controls > cases
+"
+"2","Setting levels: control = 0, case = 1
+"
+"2","Setting direction: controls < cases
+"

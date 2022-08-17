@@ -1,0 +1,8 @@
+"0","plotgfapCastPCAinput <- as.data.table("
+"0","  gfapCastPCA$x,"
+"0","  keep.rownames = T)"
+"0","plotgfapCastPCAinput[,age:=""Young""]"
+"0","plotgfapCastPCAinput[grep(""^O"",rn),age:=""Old""]"
+"0","plotgfapCastPCAinput[,class:=0]"
+"0","plotgfapCastPCAinput[age=='Old',class:=1]"
+"0","plotgfapCastPCAinput$age <- factor(plotgfapCastPCAinput$age, levels = c(""Young"", ""Old""))"

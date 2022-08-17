@@ -1,0 +1,60 @@
+# Generate heatmap to plot age-specific metabolites/lipids from DESI-MSI data
+
+```{r}
+rm(list=ls())
+
+library(tidyverse)
+library(data.table)
+library(RColorBrewer)
+library(mixOmics)
+library(ComplexHeatmap)
+library(MASS)
+```
+
+```{r}
+load("../../Output_Data/Age_sPLSDA_features.Rdata")
+ssDT <- fread('../../Output_Data/20210512_DESI_decomposition_single_sample.csv')
+
+inputDT <- as_tibble(ssDT) %>% 
+  mutate(., age = ifelse(class == 1, "Old", "Young")) %>% 
+  filter(., !cell == "other") %>% 
+  mutate(., cell = case_when(
+    cell == "gfap" ~ "qNSC",
+    cell == "both" ~ "aNSC",
+    cell == "ki67" ~ "NPC",
+  )) %>% 
+  filter(., peak %in% agePLSDA_important_feature) %>% 
+  group_by(cell, peak, age) %>% 
+  summarise(., Mean_int = mean(mean)) %>% 
+  mutate(., Label = paste0(cell, "_", age)) %>% 
+  ungroup() %>% 
+  dplyr::select(., -c("cell", "age"))
+
+Z.inputMat <- inputDT %>% 
+  group_by(peak) %>% 
+  group_modify(~{
+    .x %>% 
+      mutate(., zscore = as.numeric(scale(Mean_int)))
+  })
+
+C.inputMat <-Z.inputMat %>% 
+  dplyr::select(., -Mean_int) %>% 
+  pivot_wider(names_from = "Label", values_from = "zscore") %>% 
+  column_to_rownames(., var = "peak")
+```
+
+```{r}
+pdf( paste0("../../Figure_Panels/Fig_S3e.pdf"), width =3.5, height =5)
+set.seed(1234)
+HM = Heatmap(C.inputMat, 
+                  km=2,
+                  clustering_distance_rows = "pearson",
+                  row_names_gp = gpar(fontsize = 8),
+                  name = " ",
+             show_row_names = FALSE,
+             row_dend_side = "right",
+             column_dend_height = unit(2, "mm"))
+ageClu <- draw(HM)
+dev.off()
+```
+

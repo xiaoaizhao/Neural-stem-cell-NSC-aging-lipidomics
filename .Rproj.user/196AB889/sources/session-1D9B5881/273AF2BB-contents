@@ -1,0 +1,136 @@
+# PCA on quiescent NSC population (GFAP+ Ki67-) _in situ_ on all metabolites/lipids from DESI-MSI
+
+
+```{r}
+rm(list=ls())
+
+library(tidyverse)
+library(data.table)
+library(RColorBrewer)
+library(ggthemes)
+library(pROC)
+```
+
+
+```{r}
+#load both sample level results as well as Effect Size table
+ssDT <- fread('../../Output_Data/20210512_DESI_decomposition_single_sample.csv')
+```
+
+```{r}
+dt2matrix <- function(inputDT){
+  inM <- as.matrix(inputDT[,-1])
+  row.names(inM) <- inputDT$sampleID
+  return(inM)
+}
+
+allcCastMat <- dt2matrix(
+  dcast.data.table(ssDT[cell!='other'],
+                   sampleID~cell+peak,
+                   value.var = 'mean'))
+
+cellCastMat <- dt2matrix(
+  dcast.data.table(ssDT[cell!='other'],
+                   paste0(sampleID,"_",cell)~peak,
+                   value.var = 'mean'))
+
+gfapCastMat <- dt2matrix(
+  dcast.data.table(ssDT[cell=='gfap'],
+                   sampleID~cell+peak,
+                   value.var = 'mean'))
+```
+
+
+```{r}
+gfapCastPCA <- prcomp(gfapCastMat)
+
+gfapCastPCADT <- as.data.table(gfapCastPCA$x,keep.rownames = T)
+gfapCastPCADT[,class:=0]
+gfapCastPCADT[grep("^O",rn),class:=1]
+gfapCastPCADT <- melt.data.table(gfapCastPCADT,id.vars = c("rn",'class'))
+```
+
+
+```{r}
+ttestDT <- function(valueV,classV,ttest=T){
+  if(ttest==T){
+    t.test(valueV[classV==0],valueV[classV==1])
+  }
+  else{
+    wilcox.test(valueV[classV==0],valueV[classV==1])
+  }
+}
+```
+
+```{r}
+unique(gfapCastPCADT[,ttestDT(value,class),variable][,conf.int:=NULL])[order(p.value)]
+```
+
+```{r}
+data.table(
+  PC=gfapCastPCADT[,.N,variable]$variable,
+  pv=sapply(
+    lapply(gfapCastPCADT[,.N,variable]$variable,
+           function(i){
+             wilcox.test(gfapCastPCADT[variable==i][class==1]$value,
+                         gfapCastPCADT[variable==i][class==0]$value)
+           }),function(j) j$p.value),
+  
+  auc=sapply(gfapCastPCADT[,.N,variable]$variable,
+             function(i){
+               roc(gfapCastPCADT[variable==i]$class,
+                   gfapCastPCADT[variable==i]$value)$auc
+             })
+  
+)[,fdr:=p.adjust(pv)][order(pv)]
+```
+
+```{r}
+plotgfapCastPCAinput <- as.data.table(
+  gfapCastPCA$x,
+  keep.rownames = T)
+plotgfapCastPCAinput[,age:="Young"]
+plotgfapCastPCAinput[grep("^O",rn),age:="Old"]
+plotgfapCastPCAinput[,class:=0]
+plotgfapCastPCAinput[age=='Old',class:=1]
+plotgfapCastPCAinput$age <- factor(plotgfapCastPCAinput$age, levels = c("Young", "Old"))
+```
+
+
+#create a decision boundary using logistic regression
+##https://stats.stackexchange.com/questions/6206/how-to-plot-decision-boundary-in-r-for-logistic-regression-model
+```{r}
+xplot = "PC3"
+yplot = "PC9"
+
+decB <- glm(class ~ plotgfapCastPCAinput[,get(xplot)] + plotgfapCastPCAinput[,get(yplot)],
+            data   = plotgfapCastPCAinput,
+            family = binomial)
+
+summary(decB)
+
+slope <- coef(decB)[2]/(-coef(decB)[3])
+intercept <- coef(decB)[1]/(-coef(decB)[3]) 
+```
+
+```{r}
+plotgfapCastPCAinput <- as.data.frame(plotgfapCastPCAinput)
+
+ggplot(plotgfapCastPCAinput,
+       aes(x=plotgfapCastPCAinput[,xplot],
+           y=plotgfapCastPCAinput[,yplot],
+           color=age)) + 
+  geom_point(size=4, alpha=0.8) + 
+  geom_abline(slope = slope,intercept = intercept,
+              linetype=2) + 
+  scale_color_manual(values = c("darkgoldenrod", "maroon"))+
+  xlab(paste0(xplot, ": ", format(summary(gfapCastPCA)$importance[2,xplot] * 100,
+                                  digits = 3), " % variance"))+
+  ylab(paste0(yplot, ": ", format(summary(gfapCastPCA)$importance[2,yplot] * 100,
+                                  digits = 3), " % variance"))+
+  theme_classic()+
+  theme(text=element_text(size = 13, face = "plain"),
+        axis.text = element_text(colour = "black"))
+ggsave(paste0("../../Figure_Panels/Fig_2d.pdf"), width = 5, height = 5, useDingbats=FALSE)
+```
+

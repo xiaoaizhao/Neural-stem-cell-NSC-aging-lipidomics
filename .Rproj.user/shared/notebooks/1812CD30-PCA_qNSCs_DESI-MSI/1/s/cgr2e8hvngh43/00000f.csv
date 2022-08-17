@@ -1,0 +1,8 @@
+"0","ttestDT <- function(valueV,classV,ttest=T){"
+"0","  if(ttest==T){"
+"0","    t.test(valueV[classV==0],valueV[classV==1])"
+"0","  }"
+"0","  else{"
+"0","    wilcox.test(valueV[classV==0],valueV[classV==1])"
+"0","  }"
+"0","}"

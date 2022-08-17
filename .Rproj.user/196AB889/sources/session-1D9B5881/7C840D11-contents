@@ -1,0 +1,121 @@
+# ANOVA analysis to identify metabolites/lipids that have significant cell type:age interaction in DESI-MSI data
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+rm(list=ls())
+library(tidyverse)
+library(data.table)
+library(RColorBrewer)
+library(mixOmics)
+library(ComplexHeatmap)
+source('data_loader.R')
+source('deconvolution_functions.R')
+```
+
+# Data loading and processing
+
+Load data and write functions to convert it into a matrix for follow-up analyses:
+
+```{r}
+#load Effect Size table
+ssDT <- fread('../../Output_Data/20210512_DESI_decomposition_single_sample.csv')
+```
+
+```{r}
+dt2matrix <- function(inputDT){
+  inM <- as.matrix(inputDT[,-1])
+  row.names(inM) <- inputDT$sampleID
+  return(inM)
+}
+
+allcCastMat <- dt2matrix(
+  dcast.data.table(ssDT[cell!='other'],
+                   sampleID~cell+peak,
+                   value.var = 'mean'))
+
+cellCastMat <- dt2matrix(
+  dcast.data.table(ssDT[cell!='other'],
+                   paste0(sampleID,"_",cell)~peak,
+                   value.var = 'mean'))
+
+gfapCastMat <- dt2matrix(
+  dcast.data.table(ssDT[cell=='gfap'],
+                   sampleID~cell+peak,
+                   value.var = 'mean'))
+```
+
+
+# Analysis of interactions between age and cell type using ANOVA
+
+Previous efforts to use unsupervised learning sucked. The issue (classic) is that
+we have way too many features and not enough samples. Perform ANOVA using a simple 
+linear model (try later with GAMs), to perform feature selection. Cell type and age 
+are encoded as factors. Response is the mean level per sample.
+
+```{r}
+ssDTanovaCellPeak <- rbindlist(
+  lapply(
+    ssDT[,.N,peak]$peak,
+    function(peakID){
+      as.data.table(
+        anova(
+          lm(mean~class*cell -1,
+             data=ssDT[peak==peakID])
+        )[5],keep.rownames = T)[,peak:=peakID]
+    }
+  ))[order(`Pr(>F)`)][!is.na(`Pr(>F)`)]
+```
+
+
+
+```{r}
+ssDTanovaCellPeakInt <- copy(ssDTanovaCellPeak[rn=='class:cell'])
+ssDTanovaCellPeakInt[,fdr:=p.adjust(`Pr(>F)`,method = 'fdr')]
+ssDTanovaCellPeakInt[fdr < .2]
+```
+
+```{r}
+library(ggplot2)
+library(ggthemes)
+library(ggbeeswarm)
+
+ssDT[,age:="Young"]
+ssDT[class==1,age:="Old"]
+
+ssDT[,cellS:='o']
+ssDT[cell=='both',cellS:='aNSC']
+ssDT[cell=='gfap',cellS:='qNSC']
+ssDT[cell=='ki67',cellS:='NPC']
+
+ssDT[,scaled_y:=scale(mean),peak]
+
+ssDT$age <- factor(ssDT$age, levels = c("Young", "Old"))
+ssDT$cellS <- factor(ssDT$cellS, levels = c("aNSC", "qNSC", "NPC"))
+
+ggplot(ssDT[cell!='other'][
+  peak %in% ssDTanovaCellPeakInt[fdr < .2]$peak
+],
+aes(x=cellS,
+    color=age,
+    y=scaled_y)) + 
+  geom_boxplot(outlier.shape = NA) + facet_grid(.~peak) + 
+  geom_point(position = position_jitterdodge(), alpha = 0.7,
+             aes(shape = cellS), size = 2.5)+
+  theme_classic()+
+  theme(legend.position = 'bottom') + 
+  labs(fill="") + xlab('cell type') +
+  ylab("normalized metabolite intensity") +
+  ggtitle("Lipid peaks with significant age:cell interactions") +
+  scale_color_manual(values = c("darkgoldenrod", "maroon"))+
+  scale_shape_manual(values=c(16,17,18))+
+  theme(text=element_text(size = 12, face = "plain"),
+        axis.title = element_text(colour = "black"))
+ggsave(filename = paste0("../../Figure_Panels/Fig_S3f.pdf"),
+       width = 6, height = 5, useDingbats=FALSE)
+```
+
+

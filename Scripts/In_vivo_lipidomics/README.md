@@ -1,0 +1,27 @@
+# _In vivo_ NSC lipidomics on LC-MS (2020)
+
+This folder contains all processing script for this data set.
+
+Please run scripts in order (0-11), which includes all pre-processing steps and downstream analysis.
+
+### Pre-processing steps are in the following order:
+
+* Manually annotate spike-in standards and organize into a dataframe
+* Correct lipids with multiple annotation by only keeping one with the highest mscore
+* For each lipid class, only keep lipid with the most abundant ion adduct (previously determined)
+* Remove duplicated lipids (i.e. lipid with the exact same headgroup and side chain) by only keeping one with the highest intensity across all samples
+* Calculate endogenous lipid concentration based on spike-in standard for each lipid class
+* Normalization with spike-in standard
+* Use median concentration normalization to normalize input material.
+* Perform imputation to replace missing value
+
+### Figure panels generated:
+
+PCA plot (Fig. S2b)
+
+Pie chart on lipid class composition (Fig. S2a)
+
+Double bond composition heatmap (Fig. S2c)
+
+
+

@@ -1,0 +1,6 @@
+"0","gfapCastPCA <- prcomp(gfapCastMat)"
+"0",""
+"0","gfapCastPCADT <- as.data.table(gfapCastPCA$x,keep.rownames = T)"
+"0","gfapCastPCADT[,class:=0]"
+"0","gfapCastPCADT[grep(""^O"",rn),class:=1]"
+"0","gfapCastPCADT <- melt.data.table(gfapCastPCADT,id.vars = c(""rn"",'class'))"

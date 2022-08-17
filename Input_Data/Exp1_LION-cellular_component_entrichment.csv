@@ -1,0 +1,7 @@
+"Term ID","Discription","Annotated","p-value","FDR q-value","ES","Regulated"
+"LION:0012080","endoplasmic reticulum (ER)",216,"0.00025","0.0015",-0.224128540305011,"DOWN"
+"LION:0012082","plasma membrane",66,"0.00365","0.0109",0.241224122412241,"UP"
+"LION:0012084","lipid droplet",51,"0.24762","0.4952",0.154088050314465,"UP"
+"LION:0012085","golgi apparatus",18,"0.59010","0.5904",0.178062678062678,"UP"
+"LION:0012086","endosome/lysosome",18,"0.59010","0.5904",0.178062678062678,"UP"
+"LION:0012081","mitochondrion",118,"0.59038","0.5904",0.0861638192990749,"UP"

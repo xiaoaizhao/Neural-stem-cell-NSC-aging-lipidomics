@@ -1,0 +1,420 @@
+# Feature selection in DESI-MSI data by sPLS-DA
+
+```{r}
+rm(list=ls())
+
+library(tidyverse)
+library(data.table)
+library(RColorBrewer)
+library(mixOmics)
+library(ComplexHeatmap)
+library(MASS)
+
+source('data_loader.R')
+source('deconvolution_functions.R')
+
+```
+
+Load data and pre-processing
+```{r}
+ssDT <- fread('../../Output_Data/20210512_DESI_decomposition_single_sample.csv')
+
+
+ssCastDT <- dcast.data.table(
+  ssDT[cell!='other'],
+  class+cell+sampleID~peak,
+  value.var = 'mean'
+)
+ssCastAgeDT <- copy(ssCastDT)
+ssCastAgeDT[,sampleID:=NULL]
+ssCastAgeDT[,age:='Old']
+ssCastAgeDT[class==0,age:='Young']
+ssCastAgeDT[,class:=NULL]
+ssCastAgeDT[,cell:=NULL]
+
+ssCastCellDT <- copy(ssCastDT)
+ssCastCellDT[,sampleID:=NULL]
+ssCastCellDT[,class:=NULL]
+
+```
+
+Get elbow point for AUC analysis
+```{r}
+getElbowPoint <- function(x_values, y_values) {
+  
+  # Max values to create line
+  max_x_x <- max(x_values)
+  max_x_y <- y_values[which.max(x_values)]
+  max_y_y <- max(y_values)
+  
+  #
+  y_diff <- max_y_y - y_values
+  return(y_diff)
+}
+```
+
+sPLS-DA plotting
+```{r}
+plsda_background_comp <- function(inputPSLD_obj){
+  background.predict(
+    inputPSLD_obj,
+    comp.predicted=2,
+    dist = 'max.dist')
+}
+```
+
+Plotting function for cell type-specific metabolites/lipids
+```{r}
+plsda_cell_age_plotter <- function(
+    inputPSLD_obj,
+    ageLabels = ssCastAgeDT$age){
+  
+  inputPSLD_obj_back <- plsda_background_comp(inputPSLD_obj)
+  
+  inputPSLD_obj_back_DT <- rbind(
+    as.data.table(inputPSLD_obj_back$both)[,cell:='aNSC'],
+    as.data.table(inputPSLD_obj_back$gfap)[,cell:='qNSC'],
+    as.data.table(inputPSLD_obj_back$ki67)[,cell:='NPC']
+  )[,PSLD1:=Var1][,PSLD2:=Var2]
+  
+  inputPSLD_obj_DT <- data.table(
+    PSLD1 = inputPSLD_obj$variates$X[,1],
+    PSLD2 = inputPSLD_obj$variates$X[,2],
+    cell  = inputPSLD_obj$Y,
+    age   = ageLabels)
+  
+  inputPSLD_obj_DT[,CellType:='aNSC']
+  inputPSLD_obj_DT[cell=="gfap",CellType:='qNSC']
+  inputPSLD_obj_DT[cell=="ki67",CellType:='NPC']
+  
+  cell.pal <- c("#664692", "#63A66C", "gray29")
+  
+  inputPSLD_obj_back_DT$cell <- factor(inputPSLD_obj_back_DT$cell,
+                                       levels = c("aNSC", "qNSC", "NPC"))
+  
+  inputPSLD_obj_DT$CellType <- factor(inputPSLD_obj_DT$CellType,
+                                       levels = c("aNSC", "qNSC", "NPC"))
+  
+  ggplot(
+    inputPSLD_obj_back_DT,
+    aes(x=PSLD1,
+        y=PSLD2
+        )
+    ) +
+    geom_polygon(alpha=0.2, aes(fill = cell)) +
+    scale_fill_manual(values = cell.pal)  +
+    geom_point(data=inputPSLD_obj_DT,
+               aes(color=CellType,
+                   shape=age),
+               size=2.5,
+               alpha = 0.85)+
+    
+    scale_color_manual(values = cell.pal) +
+    scale_shape_manual(values=c(17,16)) +
+    theme_classic() +
+    xlab("PLS-D1") + ylab("PLS-D2")+
+    theme(text=element_text(size = 12, face = "plain"),
+          axis.text = element_text(colour = "black"))
+}
+```
+
+Plotting function for age-specific metabolites/lipids
+```{r}
+plsda_age__cell_plotter <- function(
+    inputPSLD_obj,
+    cellLabels = ssCastCellDT$cell){
+  
+  inputPSLD_obj_back <- plsda_background_comp(ssCastAgeSPLSDA)
+
+inputPSLD_obj_back_DT <- rbind(
+  as.data.table(inputPSLD_obj_back$Old)[,  age:='Old'],
+  as.data.table(inputPSLD_obj_back$Young)[,age:='Young']
+)[,PSLD1:=Var1][,PSLD2:=Var2]
+
+inputPSLD_obj_DT <- data.table(
+  PSLD1 = ssCastAgeSPLSDA$variates$X[,1],
+  PSLD2 = ssCastAgeSPLSDA$variates$X[,2],
+  age   = ssCastAgeSPLSDA$Y,
+  cell  = cellLabels)
+
+inputPSLD_obj_DT[,CellType:='aNSC']
+inputPSLD_obj_DT[cell=="gfap",CellType:='qNSC']
+inputPSLD_obj_DT[cell=="ki67",CellType:='NPC']
+
+inputPSLD_obj_DT$CellType <- factor(inputPSLD_obj_DT$CellType,
+                                    levels = c("aNSC", "qNSC", "NPC"))
+
+age.pal <- c("maroon", "darkgoldenrod")
+ggplot(
+  inputPSLD_obj_back_DT,
+  aes(x=PSLD1,
+      y=PSLD2,
+      fill=age)) + 
+  geom_polygon(alpha=0.2) +
+  geom_point(data=inputPSLD_obj_DT,
+             aes(color=age,
+                 shape=CellType),
+             size=4, 
+             alpha = 0.85)+
+  scale_fill_manual(values = age.pal)  +
+  scale_color_manual(values = age.pal) +
+  scale_shape_manual(values=c(16,17,18)) +
+  theme_classic() +
+  xlab("PLS-D1") + ylab("PLS-D2")+
+  theme(text=element_text(size = 12, face = "plain"),
+        axis.text = element_text(colour = "black"))
+}
+```
+
+Cell types-specific feature selection by sPLS-DA
+```{r}
+cellSPLSDA <- mclapply(
+  1:2000,
+  function(featureN){
+    auroc(
+      splsda(
+        X = as.matrix(copy(ssCastCellDT)[,cell:=NULL]),
+        Y = ssCastCellDT$cell,
+        keepX = c(featureN,featureN)
+      ),
+      plot = F,print = F)
+  },
+  mc.cores=10)
+
+
+cellSPLSDAdT <- rbindlist(
+  lapply(
+    1:length(cellSPLSDA),
+    function(n)
+      rbind(
+        as.data.table(
+          cellSPLSDA[[n]]$Comp1,
+          keep.rownames = T
+        )[,comp:=1],
+        as.data.table(
+          cellSPLSDA[[n]]$Comp2,
+          keep.rownames = T
+        )[,comp:=2])[,n:=n]
+  ))
+```
+
+```{r}
+diffDT <- cellSPLSDAdT[,median(AUC),.(n,comp)][,.(getElbowPoint(n,V1),n),comp]
+
+ggplot(
+  diffDT,
+  aes(x=n,y=V1,color=factor(comp)))+
+  geom_point() + 
+  geom_line() + 
+  ylab("distance to max AUC")
+
+diffDT[comp==1,.SD[1],V1][V1>0.01][.N]$n
+diffDT[comp==2,.SD[1],V1][V1>0.01][.N]$n
+```
+
+```{r}
+cellTypeSepFeatureNc1 = diffDT[comp==1,.SD[1],V1][V1>0.01][.N]$n #302 features in component 1
+cellTypeSepFeatureNc2 = diffDT[comp==2,.SD[1],V1][V1>0.01][.N]$n #98 features in component 2
+```
+
+Permutation test - compare selected features against random sampling
+```{r}
+fixedMatrix <- as.matrix(copy(ssCastCellDT)[,cell:=NULL])
+
+cellSPLSDArandom <- lapply(
+  1:100,
+  function(i){
+    auroc(
+      splsda(
+        X = fixedMatrix,
+        Y = sample(ssCastCellDT$cell),
+        keepX = c(cellTypeSepFeatureNc1,
+                  cellTypeSepFeatureNc2)
+      ),
+      plot = F,print = F)
+  })
+gc()
+```
+
+```{r}
+cellSPLSDArandomDT <- rbindlist(
+  lapply(
+    1:length(cellSPLSDArandom),
+    function(i)
+      rbind(
+        as.data.table(
+          cellSPLSDArandom[[i]]$Comp1,
+          keep.rownames = T
+        )[,comp:=1],
+        as.data.table(
+          cellSPLSDArandom[[i]]$Comp2,
+          keep.rownames = T
+        )[,comp:=2])[,p:=i]
+  ))
+cellSPLSDArandomDT[comp==1,n:=cellTypeSepFeatureNc1]
+cellSPLSDArandomDT[comp==2,n:=cellTypeSepFeatureNc2]
+```
+
+Validation by permutation test
+```{r}
+serr <- function(i){sd(i)/sqrt(length(i))}
+
+cellSPLSDAmonteCarlo <- cellSPLSDArandomDT[,mean(AUC),.(comp,n,p)][
+  ,.(mean(V1),serr(V1)),.(comp,n)
+][cellSPLSDAdT[,mean(AUC),.(comp,n)],o=.(comp,n)][!is.na(V1)]
+cellSPLSDAmonteCarlo[,z:=(i.V1-V1)/V2]
+cellSPLSDAmonteCarlo
+
+# Result: the target features produces a significantly higher AUC than random sampling
+```
+
+Plot
+```{r}
+ssCastCellSPLSDA <- splsda(
+  X = as.matrix(copy(ssCastCellDT)[,cell:=NULL]),
+  Y = ssCastCellDT$cell,
+  keepX = c(cellTypeSepFeatureNc1,
+            cellTypeSepFeatureNc2)
+)
+
+plsda_cell_age_plotter(ssCastCellSPLSDA) + ggtitle("PLSDA DESI cell types") 
+ggsave(filename = paste0("../../Figure_Panels/Fig_S3c.pdf"),
+       width = 5.5, height = 5, useDingbats=FALSE)
+```
+
+Age-specific feature selection by sPLS-DA
+```{r}
+ageSPLSDA <- lapply(
+  1:200,
+  function(featureN){
+    auroc(
+      splsda(
+        X = as.matrix(copy(ssCastAgeDT)[,age:=NULL]),
+        Y = ssCastAgeDT$age,
+        keepX = c(featureN,featureN)
+      ),
+      plot = F,print = F)
+  })
+
+ageSPLSDAdT <- rbindlist(
+  lapply(
+    1:length(ageSPLSDA),
+    function(n)
+      rbind(
+        as.data.table(
+          ageSPLSDA[[n]]$Comp1,
+          keep.rownames = T
+        )[,comp:=1],
+        as.data.table(
+          ageSPLSDA[[n]]$Comp2,
+          keep.rownames = T
+        )[,comp:=2])[,n:=n]
+  ))
+```
+
+```{r}
+AgeDiffDT <- ageSPLSDAdT[,median(AUC),.(n,comp)][,.(getElbowPoint(n,V1),n),comp]
+
+ggplot(
+  AgeDiffDT,
+  aes(x=n,y=V1,color=factor(comp)))+
+  geom_point() + 
+  geom_line() + 
+  ylab("distance to max AUC")
+
+AgeDiffDT[comp==1,.SD[1],V1][V1>0.01][.N]$n 
+AgeDiffDT[comp==2,.SD[1],V1][V1>0.01][.N]$n 
+```
+
+```{r}
+AgeSepFeatureNc1 = AgeDiffDT[comp==1,.SD[1],V1][V1>0.01][.N]$n # 53 features in component 1
+AgeSepFeatureNc2 = AgeDiffDT[comp==2,.SD[1],V1][V1>0.01][.N]$n #14 features in component 2
+```
+
+Permutation test - compare selected features against random sampling
+```{r}
+fixedMatrix <- as.matrix(copy(ssCastAgeDT)[,age:=NULL])
+
+ageSPLSDArandom <- lapply(
+  1:100,
+  function(i){
+    auroc(
+      splsda(
+        X = fixedMatrix,
+        Y = sample(ssCastAgeDT$age),
+        keepX = c(AgeSepFeatureNc1,
+                  AgeSepFeatureNc2)
+      ),
+      plot = F,print = F)
+  })
+gc()
+```
+
+```{r}
+ageSPLSDArandomDT <- rbindlist(
+  lapply(
+    1:length(ageSPLSDArandom),
+    function(i)
+      rbind(
+        as.data.table(
+          ageSPLSDArandom[[i]]$Comp1,
+          keep.rownames = T
+        )[,comp:=1],
+        as.data.table(
+          ageSPLSDArandom[[i]]$Comp2,
+          keep.rownames = T
+        )[,comp:=2])[,p:=i]
+  ))
+ageSPLSDArandomDT[comp==1,n:=AgeSepFeatureNc1]
+ageSPLSDArandomDT[comp==2,n:=AgeSepFeatureNc2]
+```
+
+Validation by permutation test
+```{r}
+serr <- function(i){sd(i)/sqrt(length(i))}
+
+ageSPLSDAmonteCarlo <- ageSPLSDArandomDT[,mean(AUC),.(comp,n,p)][
+  ,.(mean(V1),serr(V1)),.(comp,n)
+][ageSPLSDAdT[,mean(AUC),.(comp,n)],o=.(comp,n)][!is.na(V1)]
+ageSPLSDAmonteCarlo[,z:=(i.V1-V1)/V2]
+ageSPLSDAmonteCarlo
+```
+
+Plot
+```{r}
+ssCastAgeSPLSDA <- splsda(
+  X = as.matrix(copy(ssCastAgeDT)[,age:=NULL]),
+  Y = ssCastAgeDT$age,
+  keepX = c(AgeSepFeatureNc1,
+            AgeSepFeatureNc2)
+)
+
+plsda_age__cell_plotter(ssCastAgeSPLSDA) + ggtitle("PLSDA DESI age groups")
+ggsave(filename = paste0("../../Figure_Panels/Fig_S3d.pdf"),
+       width = 5.5, height = 5, useDingbats=FALSE)
+```
+
+Export ag-specific metabolites/lipids for heatmap plotting
+```{r}
+agePLSDA_important_feature <- as.data.table(
+  ssCastAgeSPLSDA$loadings$X,
+  keep.rownames = T)[comp1!=0 | comp2!=0][,.N,rn]$rn
+
+length(agePLSDA_important_feature) #67
+
+inputDT <- dcast.data.table(
+  ssDT[cell!='other'][
+    peak %in% agePLSDA_important_feature
+  ][
+    ,mean(mean),.(class,peak)
+  ],
+  class~peak,
+  value.var = 'V1'
+)
+
+inputMat <- as.matrix(inputDT[,-1])
+row.names(inputMat) <- inputDT$class
+
+save(agePLSDA_important_feature, file = "../../Output_Data/Age_sPLSDA_features.Rdata")
+```
+

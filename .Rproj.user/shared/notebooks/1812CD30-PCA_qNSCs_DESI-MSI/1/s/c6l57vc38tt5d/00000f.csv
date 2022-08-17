@@ -1,0 +1,2 @@
+"0","#load both sample level results as well as Effect Size table"
+"0","ssDT <- fread('../../Output_Data/20210512_DESI_decomposition_single_sample.csv')"
