@@ -91,7 +91,7 @@ clus2 <- z.sig.plot %>%
 
 clus.ord.mtx <- bind_rows(clus2, clus1)
 
-pdf(qq("./Figure_Panels//Fig_1c.pdf"), width =4, height =8)
+pdf(qq("./Figure_Panels/Fig_1c.pdf"), width =4, height =8)
 HM.2 <- Heatmap(clus.ord.mtx, name = "mat", 
                 cluster_rows = FALSE,
                 column_title = "Lipids with significant change with age in qNSCs",

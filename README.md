@@ -4,7 +4,7 @@ This is the repository containing code for pre-processing, normalization, quanti
 
 >Reference: <br>**Lipidomic profiling reveals age-dependent changes in complex plasma membrane lipids that regulate neural stem cell aging** <br>
 >Authors: Xiaoai Zhao, Xin Yan#, Kévin Contrepois#, Francesco Vallania, Mathew Ellenberger, Chloe M. Kashiwagi, Stephanie D. Gagnon, Cynthia J. Siebrand, Matias Cabruja, Gavin M. Traber, Andrew McKay, Daniel Hornburg, Purvesh Khatri, Michael P. Snyder^, Richard N. Zare^ and Anne Brunet <br>
->Preprint:XXXXXXXXXXXXXXXXXXXXXXXXXXXX
+>Preprint: https://www.biorxiv.org/content/10.1101/2022.08.18.503095v1.article-metrics
 
 ## Repository content:
 
