@@ -18,7 +18,7 @@ This is the repository containing code for pre-processing, normalization, quanti
 
 2. [Primary culture#2](https://github.com/xiaoaizhao/Neural-stem-cell-NSC-aging-lipidomics/tree/main/Scripts/Primary_culture%232) - Untargeted lipidomics on quiescent NSCs with genetic knockout
 
-3. [Primary culture#3]() - Untargeted lipidomics on activated and quiescent NSCs
+3. [Primary culture#3](https://github.com/xiaoaizhao/Neural-stem-cell-NSC-aging-lipidomics/tree/main/Scripts/Primary_culture%233) - Untargeted lipidomics on activated and quiescent NSCs
 
 4. [In vivo lipidomics](https://github.com/xiaoaizhao/Neural-stem-cell-NSC-aging-lipidomics/tree/main/Scripts/In_vivo_lipidomics) - Untargeted lipidomics on _in vivo_ isolated quiescent NSCs
 
@@ -28,13 +28,13 @@ This is the repository containing code for pre-processing, normalization, quanti
 
 7. [DESI-MSI](https://github.com/xiaoaizhao/Neural-stem-cell-NSC-aging-lipidomics/tree/main/Scripts/DESI_MSI) - Untargetd lipidomics on the subventricular zone (SVZ) neurogenic niche _in situ_.
 
-8. [_Mboat2_ overexpression and young plasma membrane lipid supplementation lipidomics]() - Untargeted lipidomics on qNSCs with _Mboat2_ overexpression or with young plasma membrane lipid supplementation
+8. [_Mboat2_ overexpression and young plasma membrane lipid supplementation lipidomics](https://github.com/xiaoaizhao/Neural-stem-cell-NSC-aging-lipidomics/tree/main/Scripts/Mboat2_OE_and_PM_lipid_supplementation_lipidomics) - Untargeted lipidomics on qNSCs with _Mboat2_ overexpression or with young plasma membrane lipid supplementation
 
 9. [Function scripts](https://github.com/xiaoaizhao/Neural-stem-cell-NSC-aging-lipidomics/tree/main/Scripts/Function_scripts) - Function scripts that are used in multiple different analyses
 
-10. [Overlap and cross-study analyses]() - Analyses comparing 2 or more datasets from this study
+10. [Overlap and cross-study analyses](https://github.com/xiaoaizhao/Neural-stem-cell-NSC-aging-lipidomics/tree/main/Scripts/Overlap_or_across_studies) - Analyses comparing 2 or more datasets from this study
 
-11. [Lipidomic aging signature validation]() - Validation of lipidomic aging signature (from this study) with an external dataset
+11. [Lipidomic aging signature validation](https://github.com/xiaoaizhao/Neural-stem-cell-NSC-aging-lipidomics/tree/main/Scripts/Lipidomic_aging_score_validation) - Validation of lipidomic aging signature (from this study) with an external dataset
 
 ## Technical note
 
