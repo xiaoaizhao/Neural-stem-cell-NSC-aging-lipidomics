@@ -57,6 +57,10 @@ impt.check.Ldz(Norm_filter, Norm_filter.ipt)
 Exp2_Impt_norm_conc_all <- Norm_filter.ipt
 save(Exp2_Impt_norm_conc_all, file = paste0("./Output_Data/Exp2_Norm_Impt_log2_conc_612_lipids.Rdata"))
 
+##Also create a dataframe with values transform back to raw intensity####
+raw_conc.exp2 <- 2^(Exp2_Impt_norm_conc_all)
+save(raw_conc.exp2, file = paste0("./Output_data/Exp2_Norm_Impt_backtoraw_conc612_lipids.Rdata"))
+
 ###Imputation to remove 0 value####################################################################################
 ###lipid with concentration + without concentration
 ##filter lipid should be detected at least in half of the samples (NA <24)

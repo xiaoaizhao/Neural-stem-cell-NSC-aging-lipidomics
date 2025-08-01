@@ -6,13 +6,7 @@ This folder contains processing script for this data set.
 
 * Append sample name to data frame
 
-* Use median concentration normalization to normalize input material.
+* Use median concentration normalization to normalize input material
 
 * Perform imputation to replace missing value
-
-### Figure panels generated:
-
-PCA plot (Fig. S1f)
-
-
 

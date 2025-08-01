@@ -1,8 +1,8 @@
-# Giant plasma membrane vesicles (GPMV) lipidomics on LC-MS (2020)
+# Giant plasma membrane vesicles (GPMV) lipidomics on LC-MS/MS
 
 This folder contains all processing script for this data set.
 
-Please run scripts in order (0-7), which includes all pre-processing steps and downstream analysis.
+Please run scripts in order (0-7), which includes all pre-processing steps.
 
 ### Pre-processing steps are in the following order:
 
@@ -12,11 +12,5 @@ Please run scripts in order (0-7), which includes all pre-processing steps and d
 * Remove duplicated lipids (i.e. lipid with the exact same headgroup and side chain) by only keeping one with the highest intensity across all samples
 * Calculate endogenous lipid concentration based on spike-in standard for each lipid class
 * Normalization with spike-in standard
-* Use median concentration normalization to normalize input material.
+* Use median concentration normalization to normalize input material
 * Perform imputation to replace missing value
-
-### Figure panels generated:
-
-Double bond composition heatmap (Fig. 3d)
-
-Phospholipid order index (Fig. 3f)

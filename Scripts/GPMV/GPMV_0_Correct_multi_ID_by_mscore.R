@@ -1,5 +1,5 @@
 
-##First script for processing 2020 lipidomics data from GPMV
+##First script for processing lipidomics data from GPMV
 ##Objective: 
 #1. Process lipids with multiple identified IDs only keeping the lipid with the highest mScore.
 #2. Manually annotate cholesterol

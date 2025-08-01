@@ -1,8 +1,8 @@
-# Primary NSC culture #1 NSC lipidomics on LC-MS (2017)
+# Primary NSC culture #1 NSC lipidomics on LC-MS/MS
 
 This folder contains all processing script for this data set.
 
-Please run scripts in order (0-10), which includes all pre-processing steps and downstream analysis.
+Please run scripts in order (0-9), which includes all pre-processing steps.
 
 ### Pre-processing steps are in the following order:
 
@@ -16,21 +16,9 @@ Please run scripts in order (0-10), which includes all pre-processing steps and 
 
 * Average 2 technical replicates for a subgroup of samples
 
-* Use median intensity normalization to normalize input material.
+* Use median intensity normalization to normalize input material
 
 * Perform imputation to replace missing value
-
-### Figure panels generated:
-
-PCA plot (Fig. 1b)
-
-Significant lipids with age in qNSCs (Fig. 1c)
-
-Bar chart summarizing significant lipids classification (Fig. 1d)
-
-Pie chart on lipid class composition (Fig. S1a)
-
-Double bond composition heatmap (Fig. 1e)
 
 
 

@@ -43,9 +43,17 @@ Norm_filter.ipt <- impt.func(Med_norm_121)
 ##Check the number of values that were replace by imputation = number of missing value to begin with
 impt.check(Med_norm_121, Norm_filter.ipt)
 
-Impt_norm_conc_all <- Norm_filter.ipt
-save(Impt_norm_conc_all, file = paste0("./Output_Data/Invivo_Norm_Impt_log2_conc_121_lipids.Rdata"))
+Invivo.Impt_norm_conc_all <- Norm_filter.ipt
+save(Invivo.Impt_norm_conc_all, file = paste0("./Output_Data/Invivo_Norm_Impt_log2_conc_121_lipids.Rdata"))
 
+Invivo.Impt.norm.conc.raw <- 2^Invivo.Impt_norm_conc_all %>% 
+  rownames_to_column(var = "LipidIon") %>% 
+  pivot_longer(-LipidIon, values_to = "Concentration", names_to = "Samples") %>% 
+  mutate(Class = substr(LipidIon, 1, str_locate(LipidIon, "\\(")-1)) %>% 
+  mutate(Concentration = ifelse(Class == "LPC", Concentration/50, Concentration)) %>% 
+  pivot_wider(names_from = "Samples", values_from = "Concentration")
+
+save(Invivo.Impt.norm.conc.raw, file = paste0("./Output_Data/Invivo_Norm_Impt_RAW.conc_121_lipids.Rdata"))
 ###Imputation to remove 0 value####################################################################################
 ###lipid with concentration + without concentration
 ##filter lipid should be detected at least in half of the samples (NA <6)
@@ -57,9 +65,9 @@ Norm_filter.ipt.all <- impt.func(Med_norm_130)
 ##Check the number of values that were replace by imputation = number of missing value to begin with
 impt.check(Med_norm_130, Norm_filter.ipt.all)
 
-Impt_norm_conc_no_conc_all <- Norm_filter.ipt.all
-save(Impt_norm_conc_no_conc_all, file = paste0("./Output_Data/Invivo_Norm_Impt_log2_all130_lipids.Rdata"))
+Invivo.Impt_norm_conc_no_conc_all <- Norm_filter.ipt.all
+save(Invivo.Impt_norm_conc_no_conc_all, file = paste0("./Output_Data/Invivo_Norm_Impt_log2_all130_lipids.Rdata"))
 
 ##Also create a dataframe with values transform back to raw intensity####
-raw_int.invivo <- 2^(Impt_norm_conc_no_conc_all)
-save(raw_int.invivo, file = paste0("./Output_data/Invivo_Norm_Impt_backtoraw_all130_lipids.Rdata"))
+Invivo.raw_int.invivo <- 2^(Invivo.Impt_norm_conc_no_conc_all)
+save(Invivo.raw_int.invivo, file = paste0("./Output_data/Invivo_Norm_Impt_backtoraw_all130_lipids.Rdata"))

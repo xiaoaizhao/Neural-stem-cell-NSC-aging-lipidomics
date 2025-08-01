@@ -21,3 +21,19 @@ DB_by_class_GPMV <- dplyr::bind_rows(DB_agg) #565
 save(DB_by_class_GPMV, file = paste0("./Output_Data/GPMV_DB_by_Class.Rdata"))
 
 
+#### Side chain analysis on conc lipids only ####
+rm(list = ls())
+source("./Scripts/Function_scripts/Pre-processing_functions.R")
+load("./Output_Data/GPMV_Norm_Impt_log2_conc_483_lipids.Rdata")
+
+GPMV.df <- 2^GPMV_Impt_norm_conc_all %>%
+  rownames_to_column(., var = "LipidIon") %>%
+  pivot_longer(-LipidIon, names_to = "Sample", values_to = "Conc") %>%
+  mutate(., Class = substr(LipidIon, 1, str_locate(LipidIon, "\\(")-1)) %>%
+  mutate(., SideChain = substr(LipidIon, str_locate(LipidIon, "\\(")+1, str_locate(LipidIon, "\\)")-1)) #282
+
+##Function to get aggregated intensity for each Class:DB combination####
+DB_agg <- db.tally(GPMV.df, Conc, Sample)
+CONC.DB_by_class_GPMV <- dplyr::bind_rows(DB_agg) #565
+
+save(CONC.DB_by_class_GPMV, file = paste0("./Output_Data/GPMV_CONC.DB_by_Class.Rdata"))

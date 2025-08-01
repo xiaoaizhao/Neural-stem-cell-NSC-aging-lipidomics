@@ -334,7 +334,7 @@ ggplot(cmpDT[method=='csSAM'],
                                  size = 8))+
   stat_cor(label.sep = "\n", size = 2.5)+
   theme(legend.position = "none")
-ggsave("../../Figure_Panels/Fig_S3a.pdf", width = 6, height = 2, useDingbats=FALSE)
+ggsave("../../Figure_Panels/EDFig.6a.pdf", width = 6, height = 2, useDingbats=FALSE)
 ```
 
 Perform a negative control experiment: permute proportions [n times] and assess
@@ -435,7 +435,7 @@ ggplot(permuationsCmpDT[,cor(value,mean),
                                  face = "plain",
                                  size = 8))+
   theme(legend.position = 'none')
-ggsave("../../Figure_Panels/Fig_S3b.pdf", width = 6, height = 2, useDingbats=FALSE)
+ggsave("../../Figure_Panels/EDFig.6b.pdf", width = 6, height = 2, useDingbats=FALSE)
 ```
 
 

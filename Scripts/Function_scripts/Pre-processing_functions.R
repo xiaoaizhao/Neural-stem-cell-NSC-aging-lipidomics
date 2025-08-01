@@ -80,6 +80,17 @@ impt.check.Ldz <- function(Mednorm.df, impt.df){
   return(length(d[is.na(d)]) == n.missval)
 }
 
+####Check the number of values that were replace by imputation = number of missing value to begin with
+##same function as above, this one specifically for z score data matrix used in Pct Mol analysis across data set. Since the data is alread scaled (by z score), there is no need for log2 transformation.
+impt.check.zScore.mtx <- function(Mednorm.df, impt.df){
+  n.missval = length(Mednorm.df[is.na(Mednorm.df)])
+  b <- setdiff(impt.df, Mednorm.df)
+  c <- setdiff(Mednorm.df, impt.df)
+  d <- as_tibble(!b==c)
+  return(length(d[is.na(d)]) == n.missval)
+}
+
+
 ####Funciton for aggregating lipid intensity with any given double bond in each class=========================================================
 ##1. Subset by presence or absence of each given double bond, regardless of how many times (side chains) it was identified
 ##2. Tally total intensity with every given double bond number in each class.
@@ -99,6 +110,21 @@ Db <- paste0(":", rep(0:6))
   return(sum_by_DB)
 }
 
+db.tally.list <- function(df, value, sample){
+  Db <- paste0(":", rep(0:6))
+  df_by_DB = list()
+  sum_by_DB = list()
+  for (numDB in Db) {
+    df_by_DB[[numDB]] <- {{df}} %>%
+      filter(., any(str_detect(unlist(SideChain), numDB))) %>%
+      mutate(., DB_num = numDB) %>%
+      group_by({{sample}}, Class) 
+    sum_by_DB[[numDB]]  <- df_by_DB[[numDB]] %>%
+      summarise(., Sum_DB = sum({{value}})) %>%
+      mutate(., DB_num = numDB)
+  }
+  return(sum_by_DB)
+}
 ####Fold change on doubel bond composition between age####
 DB.FC <- function(df){
   
