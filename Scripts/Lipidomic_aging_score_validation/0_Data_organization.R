@@ -9,7 +9,7 @@ library(stringi)
 #' 
 #' Matadata of all samples
 ## ---------------------------------------------------------------------------------------------------------------------
-# mt.df <- as.data.frame(t(read.csv("./Input_Data/Metadata_Fiehn.csv", stringsAsFactors = F)))
+
 mt.df <- read.csv("./Input_Data/Metadata_Fiehn.csv", stringsAsFactors = F, header = F)
 concat.func <- function(x){
   paste(x, collapse = ":")

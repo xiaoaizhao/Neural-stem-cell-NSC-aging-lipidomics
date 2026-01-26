@@ -6,11 +6,11 @@ library(stringi)
 
 ## ---------------------------------------------------------------------------------------------------------------------
 # Load DB pct analysis on the dataset
-load("./Output_Data/Ding.et.al.all.brain.DB.pct.Rdata")
+load("./old_analysis/Output_Data/Ding.et.al.all.brain.DB.pct.Rdata")
 load("./Output_Data/Meta_DB_signature.Rdata")
 
 br.db.sgnt <- br.DB.PCT %>% 
-  filter(Cla_DB %in% DB.hi.old)
+  filter(Cla_DB %in% conc.DB.hi.old)
 
 #' 
 #' #### Z score on DB PCT 

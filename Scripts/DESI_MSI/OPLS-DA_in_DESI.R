@@ -4,7 +4,7 @@ rm(list=ls())
 
 library(tidyverse)
 library(ropls)
-
+library(data.table)
 ssDT <- fread('./Output_Data/20210512_DESI_decomposition_single_sample.csv')
 
 ##====OPLS-DA between aNSCs and qNSCs from DESI====

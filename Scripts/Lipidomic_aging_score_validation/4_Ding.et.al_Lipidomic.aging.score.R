@@ -27,6 +27,7 @@ a + geom_quasirandom(width = 0.3, alpha = 0.7) +
   theme_classic() +
   scale_color_manual(values = s.cor) +
   labs(title = "Lipidomic aging score (Ding et al.)", x = "Age (weeks)", y = "Mean Z score") +
-  theme(axis.text = element_text(colour = "black"))
-ggsave(filename = "./Figure_Panels/EDFig.11e.pdf", width = 8, height = 6, useDingbats = FALSE)
+  theme(axis.text = element_text(colour = "black")) +
+  ylim(-0.8, 1.5)
+ggsave(filename = paste0("./Figure_Panels/EDFig.11e.pdf"), width = 8, height = 6, useDingbats = FALSE)
 

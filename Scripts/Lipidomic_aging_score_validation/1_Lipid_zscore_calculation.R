@@ -6,7 +6,7 @@ rm(list = ls())
 library(tidyverse)
 library(stringi)
 
-load("./Output_Data/Ding.et.al.lipid.data.for.analysis.Rdata")
+load("./old_analysis/Output_Data/Ding.et.al.lipid.data.for.analysis.Rdata")
 
 load("./Output_Data/Meta_Lipid_signature.Rdata")
 

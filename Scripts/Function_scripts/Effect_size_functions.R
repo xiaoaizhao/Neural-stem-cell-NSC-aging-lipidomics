@@ -115,6 +115,42 @@ es.g.func.KO<- function(df, variable, Grp, value, smpl){
   # return(eff.size.df)
 }
 
+## Effect size between **KO to control** ####
+#(pos ES -> higher in KO)
+#(neg ES -> higher in Ctrl [_N])
+es.g.func.KO.to.ctrl<- function(df, variable, Grp, value, smpl){
+  smpl.size <- df %>%
+    group_by({{Grp}}) %>%
+    mutate(., n = length(unique({{smpl}}))) %>%
+    summarise(., n.size = mean(n))
+  
+  mean.sd.df <- df %>%
+    group_by({{variable}}, {{Grp}}) %>%
+    summarise(KO_mean = mean({{value}}), KO_SD = sd({{value}})) %>%
+    ungroup()
+  
+  KO2 <- "N"
+  KO1 <- unique(df$KO)[!unique(df$KO) == "N"]
+  
+  KO1_mean <- paste0("KO_mean_", KO1)
+  KO2_mean <- paste0("KO_mean_", KO2)
+  
+  KO1_SD <- paste0("KO_SD_", KO1)
+  KO2_SD <- paste0("KO_SD_", KO2)
+  
+  KO1.n.size <- paste0("n.size_", KO1)
+  KO2.n.size <- paste0("n.size_", KO2)
+  
+  eff.size.df <- left_join(mean.sd.df, smpl.size) %>%
+    pivot_wider(names_from = {{Grp}}, values_from = c("KO_mean", "KO_SD", "n.size")) %>%
+    mutate(., diff = .data[[KO1_mean]] - .data[[KO2_mean]]) %>%
+    mutate(., sp = sqrt( ( (.data[[KO1.n.size]]-1)*.data[[KO1_SD]])^2 + ((.data[[KO2.n.size]]-1)*.data[[KO2_SD]]^2 )/(.data[[KO1.n.size]] + .data[[KO2.n.size]] - 2 ) )) %>%
+    mutate(., cf = 1 - 3/( 4*(.data[[KO1.n.size]] + .data[[KO2.n.size]]) - 9 )) %>%
+    mutate(., es_g = cf * diff/sp) %>%
+    mutate(., se_g = sqrt((.data[[KO1.n.size]]+.data[[KO2.n.size]])/(.data[[KO1.n.size]]*.data[[KO2.n.size]]) + 0.5*es_g^2 /(.data[[KO1.n.size]]+.data[[KO2.n.size]]-3.94)) )
+  # return(eff.size.df)
+}
+
 ## Effect size between control and treatment groups ####
 #(pos ES -> higher in Treatment)
 #(neg ES -> higher in Control)
@@ -299,4 +335,152 @@ ether.rename <- function(df) {
   dplyr::rename("LipidIon" = "LipidID") %>% 
   relocate("LipidIon")
   return(df.rename)
+}
+
+MsD.rename <- function(df) {
+  df.rename <- {{df}} %>% 
+    mutate(LipidID = ifelse(grepl("\\|", LipidIon), substr(LipidIon, str_locate(LipidIon, "\\|")+1, nchar(LipidIon)), LipidIon)) %>% 
+    relocate(LipidID, .after = LipidIon) %>% 
+    mutate(LipidID = str_replace(LipidID, " ", "("))
+  
+  df.rename2 <- df.rename %>% 
+    filter(grepl("\\;O2/|;O3/", LipidID)) %>% 
+    mutate(LipidID = str_replace(LipidID, "\\;O2/|;O3/", "_")) %>% 
+    mutate(LipidID = paste0(substr(LipidID, 1, str_locate(LipidID, "\\(")), 
+                            "d", 
+                            substr(LipidID, str_locate(LipidID, "\\(")+1, nchar(LipidID))))
+  
+  df.rename3 <- df.rename %>% 
+    filter(!grepl("\\;O2/|;O3/", LipidID)) %>% 
+    mutate(LipidID = str_replace(LipidID, "a|b|c|d|e", ""))
+  
+  df.rename.all <- bind_rows(df.rename2, df.rename3) %>% 
+    ungroup() %>% 
+    mutate(LipidID = paste0(LipidID, ")")) %>% 
+    mutate(LipidID = str_replace(LipidID, "\\'", "")) %>% 
+    mutate(LipidID = ifelse(LipidID == "ST(27:1;O)", "Cholesterol", LipidID)) %>% 
+    select(-LipidIon) %>% 
+    rename("LipidIon" = "LipidID")
+  
+  return(df.rename.all)
+}
+
+pval.from.CI <- function(df, alpha, null_value){
+  # Step 1: Calculate point estimate and SE
+  sample.num <- length(unique({{df}}$LipidIon))
+  deg.free = sample.num - 1
+  df.pval<- {{df}}  %>% 
+    group_by(LipidIon) %>% 
+    mutate(point_estimate = (CI.lower + CI.upper) / 2) %>% 
+    mutate(t_critical = qt(1 - alpha / 2, deg.free)) %>% 
+    mutate(se = (CI.upper - CI.lower) / (2 * t_critical)) %>% 
+    mutate(t = (point_estimate - null_value) / se) %>% 
+    mutate(p_value = 2 * (1 - pt(abs(t), deg.free)))
+  
+  df.padj <- df.pval %>% 
+    group_by(LipidIon) %>% 
+    filter(es_g == min(es_g)) %>% 
+    ungroup() %>% 
+    mutate(padj = p.adjust(p_value, method = "fdr")) %>% 
+    select(LipidIon, p_value, padj)
+  
+  df.stat.all <- left_join(df.pval, df.padj, by = "LipidIon")
+  
+  return(df.stat.all)
+}
+
+pval.from.CI.Lpd.summary <- function(df, alpha, null_value){
+  # Step 1: Calculate point estimate and SE
+  sample.num <- length(unique({{df}}$LipidIon))
+  deg.free = sample.num - 1
+  df.pval<- {{df}}  %>% 
+    group_by(LipidIon) %>% 
+    mutate(point_estimate = (CI.lower + CI.upper) / 2) %>% 
+    mutate(t_critical = qt(1 - alpha / 2, deg.free)) %>% 
+    mutate(se = (CI.upper - CI.lower) / (2 * t_critical)) %>% 
+    mutate(t = (point_estimate - null_value) / se) %>% 
+    mutate(p_value = 2 * (1 - pt(abs(t), deg.free)))
+  
+  df.padj <- df.pval %>% 
+    group_by(LipidIon) %>% 
+    filter(`Effect size` == min(`Effect size`)) %>% 
+    ungroup() %>% 
+    mutate(padj = p.adjust(p_value, method = "fdr")) %>% 
+    select(LipidIon, p_value, padj)
+  
+  df.stat.all <- left_join(df.pval, df.padj, by = "LipidIon")
+  
+  return(df.stat.all)
+}
+
+pval.from.CI.Lpd.DESI <- function(df, alpha, null_value){
+  # Step 1: Calculate point estimate and SE
+  sample.num <- length(unique({{df}}$LipidIon))
+  deg.free = sample.num - 1
+  df.pval<- {{df}}  %>% 
+    group_by(LipidIon) %>% 
+    mutate(point_estimate = (CI.lower + CI.upper) / 2) %>% 
+    mutate(t_critical = qt(1 - alpha / 2, deg.free)) %>% 
+    mutate(se = (CI.upper - CI.lower) / (2 * t_critical)) %>% 
+    mutate(t = (point_estimate - null_value) / se) %>% 
+    mutate(p_value = 2 * (1 - pt(abs(t), deg.free)))
+  
+  df.padj <- df.pval %>% 
+    group_by(LipidIon) %>% 
+    filter(Exp_es == min(Exp_es)) %>% 
+    ungroup() %>% 
+    mutate(padj = p.adjust(p_value, method = "fdr")) %>% 
+    select(LipidIon, p_value, padj)
+  
+  df.stat.all <- left_join(df.pval, df.padj, by = "LipidIon")
+  
+  return(df.stat.all)
+}
+
+pval.from.CI.DB <- function(df, alpha, null_value){
+  # Step 1: Calculate point estimate and SE
+  sample.num <- length(unique({{df}}$Cla_DB))
+  deg.free = sample.num - 1
+  df.pval<- {{df}}  %>% 
+    group_by(Cla_DB) %>% 
+    mutate(point_estimate = (CI.lower + CI.upper) / 2) %>% 
+    mutate(t_critical = qt(1 - alpha / 2, deg.free)) %>% 
+    mutate(se = (CI.upper - CI.lower) / (2 * t_critical)) %>% 
+    mutate(t = (point_estimate - null_value) / se) %>% 
+    mutate(p_value = 2 * (1 - pt(abs(t), deg.free)))
+  
+  df.padj <- df.pval %>% 
+    group_by(Cla_DB) %>% 
+    filter(es_g == min(es_g)) %>% 
+    ungroup() %>% 
+    mutate(padj = p.adjust(p_value, method = "fdr")) %>% 
+    select(Cla_DB, p_value, padj)
+  
+  df.stat.all <- left_join(df.pval, df.padj, by = "Cla_DB")
+  
+  return(df.stat.all)
+}
+
+pval.from.CI.DB.summary <- function(df, alpha, null_value){
+  # Step 1: Calculate point estimate and SE
+  sample.num <- length(unique({{df}}$Cla_DB))
+  deg.free = sample.num - 1
+  df.pval<- {{df}}  %>% 
+    group_by(Cla_DB) %>% 
+    mutate(point_estimate = (CI.lower + CI.upper) / 2) %>% 
+    mutate(t_critical = qt(1 - alpha / 2, deg.free)) %>% 
+    mutate(se = (CI.upper - CI.lower) / (2 * t_critical)) %>% 
+    mutate(t = (point_estimate - null_value) / se) %>% 
+    mutate(p_value = 2 * (1 - pt(abs(t), deg.free)))
+  
+  df.padj <- df.pval %>% 
+    group_by(Cla_DB) %>% 
+    filter(`Effect size` == min(`Effect size`)) %>% 
+    ungroup() %>% 
+    mutate(padj = p.adjust(p_value, method = "fdr")) %>% 
+    select(Cla_DB, p_value, padj)
+  
+  df.stat.all <- left_join(df.pval, df.padj, by = "Cla_DB")
+  
+  return(df.stat.all)
 }

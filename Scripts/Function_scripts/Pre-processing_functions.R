@@ -26,7 +26,6 @@ impt.func <- function(Mednorm.df){
   Norm_0_replace[Norm_0_replace == 0] <- NA ##convert all 0 value to 1 in order to do log2 transformation
   log2df <- log2(Norm_0_replace)
   imptdf <- log2df
-  
   set.seed(12345)
   for (i in 1:nrow(imptdf)){
     b <- imptdf[i, which(is.na(imptdf[i,])==T)]
@@ -174,4 +173,33 @@ lpd.by.db <- function(df, value, sample){
       mutate(., DB_num = numDB)
   }
   return(sum_by_DB)
+}
+
+MsD.lpd.format <- function(df) {
+  df.rename <- df %>% 
+    rowwise() %>% 
+    mutate(LipidID = ifelse(grepl("\\|", LipidIon), substr(LipidIon, str_locate(LipidIon, "\\|")+1, nchar(LipidIon)), LipidIon)) %>% 
+    mutate(LipidID = str_replace(LipidID, " ", "(")) %>% 
+    mutate(LipidID = ifelse(grepl("a|b|c", LipidID),
+                            paste0(substr(LipidID, 1, nchar(LipidID)-1), ")", substr(LipidID, nchar(LipidID), nchar(LipidID))),
+                            paste0(LipidID, ")"))) %>% 
+    select(-LipidIon) %>% 
+    rename("LipidIon" = "LipidID") %>% 
+    mutate(LipidIon = ifelse(grepl("^ST", LipidIon), "Cholesterol", LipidIon))
+  return(df.rename)
+}
+
+MsD.lpd.rmv.abc <- function(df) {
+  df.rename <- df %>% 
+    rowwise() %>% 
+    mutate(LipidID = ifelse(grepl("\\|", LipidIon), substr(LipidIon, str_locate(LipidIon, "\\|")+1, nchar(LipidIon)), LipidIon)) %>% 
+    mutate(LipidID = str_replace(LipidID, " ", "(")) %>% 
+    relocate(LipidID, .after = "LipidIon") %>% 
+    mutate(LipidID = ifelse(grepl("a|b|c", LipidID),
+                            paste0(substr(LipidID, 1, nchar(LipidID)-1), ")"),
+                            paste0(LipidID, ")"))) %>% 
+    select(-LipidIon) %>% 
+    rename("LipidIon" = "LipidID") %>% 
+    mutate(LipidIon = ifelse(grepl("^ST", LipidIon), "Cholesterol", LipidIon))
+  return(df.rename)
 }
