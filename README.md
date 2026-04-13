@@ -16,9 +16,9 @@ This is the repository containing code for pre-processing, normalization, quanti
 
 [Scripts](https://github.com/xiaoaizhao/Neural-stem-cell-NSC-aging-lipidomics/tree/main/Scripts) - Analysis scripts for individual studies
 
-1. [In vitro #1](https://github.com/xiaoaizhao/Neural-stem-cell-NSC-aging-lipidomics/tree/main/Scripts/In_vitro_lipidomics) - Untargeted lipidomics on aNSCs and qNSCs
-2. [In vitro #2](https://github.com/xiaoaizhao/Neural-stem-cell-NSC-aging-lipidomics/tree/main/Scripts/In_vitro_Experiment%232) - Untargeted lipidomics on qNSCs with genetic knockout
-3. [In vivo lipidomics](https://github.com/xiaoaizhao/Neural-stem-cell-NSC-aging-lipidomics/tree/main/Scripts/In_vivo_lipidomics) - Untargeted lipidomics on _in vivo_ isolated quiescent NSCs
+1. [_In vitro_ #1](https://github.com/xiaoaizhao/Neural-stem-cell-NSC-aging-lipidomics/tree/main/Scripts/In_vitro_%231) - Untargeted lipidomics on aNSCs and qNSCs
+2. [_In vitro_ #2](https://github.com/xiaoaizhao/Neural-stem-cell-NSC-aging-lipidomics/tree/main/Scripts/In_vitro_%232) - Untargeted lipidomics on qNSCs with genetic knockout
+3. [_In vivo_ lipidomics](https://github.com/xiaoaizhao/Neural-stem-cell-NSC-aging-lipidomics/tree/main/Scripts/In_vivo_lipidomics) - Untargeted lipidomics on _in vivo_ isolated quiescent NSCs
 4. [GPMV lipidomics](https://github.com/xiaoaizhao/Neural-stem-cell-NSC-aging-lipidomics/tree/main/Scripts/GPMV) - Untargeted lipidomics on giant plasma membrane vesicles (GPMVs) of quiescent NSCs
 5. [DESI-MSI](https://github.com/xiaoaizhao/Neural-stem-cell-NSC-aging-lipidomics/tree/main/Scripts/DESI_MSI) - Untargetd lipidomics on the subventricular zone (SVZ) neurogenic niche _in situ_.
 6. [_Mboat2_ overexpression and young plasma membrane lipid supplementation lipidomics](https://github.com/xiaoaizhao/Neural-stem-cell-NSC-aging-lipidomics/tree/main/Scripts/Mboat2_OE_and_PM_lipid_supplementation_lipidomics) - Untargeted lipidomics on qNSCs with _Mboat2_ overexpression or with young plasma membrane lipid supplementation
