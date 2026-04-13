@@ -9,8 +9,7 @@ load("./Output_Data/EffectSize_DESI_annotated_lipids.Rdata")
 load("./Output_Data/Lpd.MsD.Invivo_Age_ES.w.RT.Rdata")
 load("./Output_Data/Lpd.MsD.Invitro_Qui_Age_ES.w.RT.Rdata")
 
-DESI <- ES.lpd.anno.inDESI# %>%
-#   mutate(LipidIon = ifelse(grepl("^SM", LipidIon),"SM(18:1;O2/18:0)", LipidIon))
+DESI <- ES.lpd.anno.inDESI
 
 Invitro.es <- MsD.lpd.rmv.abc(Invitro.Q.lpd.ES.w.RT) %>% 
   ungroup() %>% 
@@ -61,7 +60,7 @@ all.ES.p <- left_join(all.lc.DESI.org, ES.mean.CI.LoUp, by = "LipidIon") %>%
                        "Significant", "Not significant"))
 
 all.ES.p.org <- all.ES.p %>% 
-  mutate(Cat = ifelse(Experiment == "DESI", "DESI", "LC-MS")) 
+  mutate(Cat = ifelse(Experiment == "DESI", "DESI", "LC-MS"))
 
 all.ES.p.org$Experiment <- factor(all.ES.p.org$Experiment, levels = c("In vitro", "In vivo", "DESI"))
 
@@ -101,3 +100,10 @@ a+
              size=1.5, stroke = 0.7, alpha = 0.75,
              colour="black") 
 ggsave(filename = "./Figure_Panels/Fig.2d.pdf", width = 5, height = 5, useDingbats = FALSE)
+
+## ==== highlight Mboat2 responsive lipids====
+load("./Output_Data/Mboat2.responsive_lipid_list.Rdata")
+
+DESI.ovlp.ls <- unique(lpd.DESI.all$LipidIon)[unique(lpd.DESI.all$LipidIon) %in% res.lpd.ls]
+DESI.ovlp.ls
+# character(0)

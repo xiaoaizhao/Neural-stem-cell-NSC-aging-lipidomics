@@ -179,3 +179,9 @@ a+
              colour="black") +
   theme(legend.position = "bottom")
 ggsave(filename = paste0("./Figure_Panels/Fig.3b.pdf"), width = 5, height = 5, useDingbats = FALSE)
+
+## ==== highlight Mboat2 responsive lipids====
+load("./Output_Data/Mboat2.responsive_lipid_list.Rdata")
+
+gpmv.ovlp.ls <- unique(top30.GPMV.p$LipidIon)[unique(top30.GPMV.p$LipidIon) %in% res.lpd.ls]
+gpmv.ovlp.ls

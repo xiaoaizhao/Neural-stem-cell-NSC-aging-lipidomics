@@ -461,6 +461,30 @@ pval.from.CI.DB <- function(df, alpha, null_value){
   return(df.stat.all)
 }
 
+pval.from.CI.SC <- function(df, alpha, null_value){
+  # Step 1: Calculate point estimate and SE
+  sample.num <- length(unique({{df}}$Cla_SC))
+  deg.free = sample.num - 1
+  df.pval<- {{df}}  %>% 
+    group_by(Cla_SC) %>% 
+    mutate(point_estimate = (CI.lower + CI.upper) / 2) %>% 
+    mutate(t_critical = qt(1 - alpha / 2, deg.free)) %>% 
+    mutate(se = (CI.upper - CI.lower) / (2 * t_critical)) %>% 
+    mutate(t = (point_estimate - null_value) / se) %>% 
+    mutate(p_value = 2 * (1 - pt(abs(t), deg.free)))
+  
+  df.padj <- df.pval %>% 
+    group_by(Cla_SC) %>% 
+    filter(es_g == min(es_g)) %>% 
+    ungroup() %>% 
+    mutate(padj = p.adjust(p_value, method = "fdr")) %>% 
+    select(Cla_SC, p_value, padj)
+  
+  df.stat.all <- left_join(df.pval, df.padj, by = "Cla_SC")
+  
+  return(df.stat.all)
+}
+
 pval.from.CI.DB.summary <- function(df, alpha, null_value){
   # Step 1: Calculate point estimate and SE
   sample.num <- length(unique({{df}}$Cla_DB))
@@ -481,6 +505,30 @@ pval.from.CI.DB.summary <- function(df, alpha, null_value){
     select(Cla_DB, p_value, padj)
   
   df.stat.all <- left_join(df.pval, df.padj, by = "Cla_DB")
+  
+  return(df.stat.all)
+}
+
+pval.from.CI.SC.summary <- function(df, alpha, null_value){
+  # Step 1: Calculate point estimate and SE
+  sample.num <- length(unique({{df}}$Cla_SC))
+  deg.free = sample.num - 1
+  df.pval<- {{df}}  %>% 
+    group_by(Cla_SC) %>% 
+    mutate(point_estimate = (CI.lower + CI.upper) / 2) %>% 
+    mutate(t_critical = qt(1 - alpha / 2, deg.free)) %>% 
+    mutate(se = (CI.upper - CI.lower) / (2 * t_critical)) %>% 
+    mutate(t = (point_estimate - null_value) / se) %>% 
+    mutate(p_value = 2 * (1 - pt(abs(t), deg.free)))
+  
+  df.padj <- df.pval %>% 
+    group_by(Cla_SC) %>% 
+    filter(`Effect size` == min(`Effect size`)) %>% 
+    ungroup() %>% 
+    mutate(padj = p.adjust(p_value, method = "fdr")) %>% 
+    select(Cla_SC, p_value, padj)
+  
+  df.stat.all <- left_join(df.pval, df.padj, by = "Cla_SC")
   
   return(df.stat.all)
 }

@@ -86,3 +86,9 @@ a+
              colour="black") +
   theme(legend.position = "bottom")
 ggsave(filename = "./Figure_Panels/Fig.1h.pdf", width = 5, height = 5, useDingbats = FALSE)
+
+## ==== highlight Mboat2 responsive lipids====
+load("./Output_Data/Mboat2.responsive_lipid_list.Rdata")
+
+invivo.ovlp.ls <- unique(c2of2sig.p$LipidIon)[unique(c2of2sig.p$LipidIon) %in% res.lpd.ls]
+invivo.ovlp.ls
