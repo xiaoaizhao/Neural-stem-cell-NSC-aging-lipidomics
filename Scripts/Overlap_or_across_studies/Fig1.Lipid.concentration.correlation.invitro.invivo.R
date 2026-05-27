@@ -85,7 +85,7 @@ a <- ggscatter(df.Lyso_TG, x = ("Log2Invitro"), y = ("Log2Invivo"),
   theme(text = element_text(size = 12, face = "plain", colour = "black"))+
   theme(axis.text = element_text(size = 12, face = "plain", colour = "black"))
 a
-ggsave(filename = "./Figure_Panels/EDFig.5d.pdf", width = 6, height = 6, useDingbats = FALSE)
+ggsave(filename = "./Figure_Panels/fig.S6D.pdf", width = 6, height = 6, useDingbats = FALSE)
 
 ## ====Plot phospholipids and cholesterol====
 mycolors <- lut.march25 %>% 
@@ -115,4 +115,4 @@ b <- ggscatter(df.mem, x = ("Log2Invitro"), y = ("Log2Invivo"),
   theme(axis.text = element_text(size = 12, face = "plain", colour = "black"))
 
 b
-ggsave(filename = "./Figure_Panels/EDFig.5c.pdf", width = 6, height = 6, useDingbats = FALSE)
+ggsave(filename = "./Figure_Panels/fig.S6C.pdf", width = 6, height = 6, useDingbats = FALSE)

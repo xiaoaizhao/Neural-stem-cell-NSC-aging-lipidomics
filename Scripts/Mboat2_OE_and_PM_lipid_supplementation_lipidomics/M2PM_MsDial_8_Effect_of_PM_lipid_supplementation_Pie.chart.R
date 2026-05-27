@@ -69,5 +69,5 @@ a+  geom_bar(stat="identity", width = 1, color = "white") +
   facet_wrap(~Age)+
   theme_void()+
   theme(legend.position = "right")
-ggsave(filename = "./Figure_Panels/EDFig.12e.pdf",
+ggsave(filename = "./Figure_Panels/fig.S14E.pdf",
        width = 8, height = 4, useDingbats = FALSE)

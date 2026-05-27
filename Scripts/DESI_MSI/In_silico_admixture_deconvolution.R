@@ -3,8 +3,8 @@ rm(list=ls())
 library(ragg)
 library(tidyverse)
 library(data.table)
-source('./Scripts/DESI/data_loader.R')
-source('./Scripts/DESI/deconvolution_functions.R')
+source('./Scripts/DESI_MSI/data_loader.R')
+source('./Scripts/DESI_MSI/deconvolution_functions.R')
 
 
 ## ----------------------------------------------------------------------------------------------------------------------------------
@@ -285,7 +285,7 @@ ggplot(cmpDT[method=='csSAM'],
                                  size = 8))+
   stat_cor(label.sep = "\n", size = 2.5)+
   theme(legend.position = "none")
-ggsave("./Figure_Panels/EDFig.6a.pdf", width = 6, height = 2, useDingbats=FALSE)
+ggsave("./Figure_Panels/fig.S7A.pdf", width = 6, height = 2, useDingbats=FALSE)
 
 
 ## ----------------------------------------------------------------------------------------------------------------------------------
@@ -373,5 +373,5 @@ ggplot(permuationsCmpDT[,cor(value,mean),
                                  face = "plain",
                                  size = 8))+
   theme(legend.position = 'none')
-ggsave("./Figure_Panels/EDFig.6b.pdf", width = 6, height = 2, useDingbats=FALSE)
+ggsave("./Figure_Panels/fig.S7B.pdf", width = 6, height = 2, useDingbats=FALSE)
 

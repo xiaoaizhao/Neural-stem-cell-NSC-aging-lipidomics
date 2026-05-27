@@ -73,7 +73,7 @@ a+
   theme(axis.text = element_text(colour = "black", size = 10)) +
   labs(x = "", y = "Lipid mol%") +
   geom_hline(yintercept = median(Invitro.p$Mean.mol.pct), linetype = "dashed")
-ggsave(paste0("./Figure_Panels/EDFig.8e.", unique(Invitro.p$Exp),".pdf"), width = 5, height = 5)
+ggsave(paste0("./Figure_Panels/fig.S9E.", unique(Invitro.p$Exp),".pdf"), width = 5, height = 5)
 
 ## ==== Plot in vitro GPMV next ====
 GPMV.p <- all2 %>% 
@@ -107,7 +107,7 @@ a+
   theme(axis.text = element_text(colour = "black", size = 10)) +
   labs(x = "", y = "Lipid mol%") +
   geom_hline(yintercept = median(GPMV.p$Mean.mol.pct), linetype = "dashed")
-ggsave(paste0("./Figure_Panels/EDFig.8e.", unique(GPMV.p$Exp),".pdf"), width = 5, height = 5)
+ggsave(paste0("./Figure_Panels/fig.S9E.", unique(GPMV.p$Exp),".pdf"), width = 5, height = 5)
 
 unique(GPMV.p$LipidIon)[unique(GPMV.p$LipidIon) %in% res.lpd.ls]
 # [1] "LPC(O-16:0)"   "LPC(O-18:1)"   "PC(16:0_22:5)" "PC(17:0_18:1)" "PC(17:1_18:1)" "PE(16:0_16:0)" "PE(18:1_18:2)"

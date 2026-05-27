@@ -115,39 +115,28 @@ df.2of2.pval.CI.t <- pval.from.CI(sig.2of2lc, 0.05, 0) ## 130 entries
 
 lpd.c2.in.2lc.df.sig.t.final <- df.2of2.pval.CI.t %>% 
   filter(padj < 0.05) %>% 
-  group_by(LipidIon) %>% 
-  group_modify(~{
-    .x %>% 
-      mutate(star.pos = case_when(
-        MeanES > 0 ~  max(es_g) + 0.8, 
-        MeanES < 0 ~ min(es_g) - 0.8)
-      ) 
-  }) #130 entires - this means all p value significant lipids are also FDR significant
+  mutate(LipidIon.l = ifelse(Sig == "Significant", 
+                             paste0(LipidIon, "<b>*</b>"), LipidIon))#130 entires - this means all p value significant lipids are also FDR significant
 
 GPMV.Invitro.lpd.fdr.sig <- lpd.c2.in.2lc.df.sig.t.final
 save(GPMV.Invitro.lpd.fdr.sig, file = "./Output_Data/Lipids.GPMV.Invitro.FDRSig.features.Rdata") #65 features
 
 
 ### ==== plot all significant changes for extended figure ==== ####
-a <-ggplot(GPMV.Invitro.lpd.fdr.sig, aes(x = fct_reorder(LipidIon, MeanES), y = es_g))
+a <-ggplot(GPMV.Invitro.lpd.fdr.sig, aes(x = fct_reorder(LipidIon.l, MeanES), y = es_g))
 a+
   geom_point(aes(shape = Exp), colour = "grey39", alpha = 0.85, size = 2.3) +
   scale_shape_manual(values = c(15, 17)) +
   geom_errorbar(aes(ymin = MeanES - SEM, ymax = MeanES + SEM), colour = "grey15", alpha = 0.75, width = 0.2) +
-  stat_summary(aes(x=LipidIon,y=MeanES), fun=mean, geom = "point", size=2.6, shape=20, alpha = 0.75, colour = "grey15") +
+  stat_summary(aes(x=LipidIon.l,y=MeanES), fun=mean, geom = "point", size=2.6, shape=20, alpha = 0.75, colour = "grey15") +
   theme_classic() +
   theme(axis.text = element_text(colour = "black", size = 5.5), axis.text.x = element_text(angle = 0, vjust = 0.1)) +
   geom_hline(yintercept = 0, linetype = "dashed") +
   coord_flip() +
   labs(title = "GPMV vs. In vitro", x = "", y = "Effect size (Old vs. Young)") +
-  geom_point(data = GPMV.Invitro.lpd.fdr.sig %>%
-               filter(Sig == "Significant"),
-             aes(x = fct_reorder(LipidIon, MeanES), y = star.pos),
-             pch=8,
-             size=1.2, stroke = 0.7, alpha = 0.75,
-             colour="black") +
-  theme(legend.position = "bottom")
-ggsave(filename = paste0("./Figure_Panels/EDFig.8d.pdf"), width = 4, height = 9, useDingbats = FALSE)
+  theme(legend.position = "bottom") +
+  theme(axis.text.y = element_markdown(colour = "black", size = 6))
+ggsave(filename = paste0("./Figure_Panels/fig.S9D.pdf"), width = 4, height = 9, useDingbats = FALSE)
 
 ### ==== Plot the top 30% biggest effect size in main
 
@@ -160,28 +149,24 @@ top30.GPMV <- GPMV.Invitro.lpd.fdr.sig %>%
 top30.GPMV.p <- GPMV.Invitro.lpd.fdr.sig %>% 
   filter(LipidIon %in% top30.GPMV$LipidIon) #40 entries
 
-a <-ggplot(top30.GPMV.p, aes(x = fct_reorder(LipidIon, MeanES), y = es_g))
+a <-ggplot(top30.GPMV.p, aes(x = fct_reorder(LipidIon.l, MeanES), y = es_g))
 a+
   geom_point(aes(shape = Exp), colour = "grey39", alpha = 0.85, size = 3) +
   scale_shape_manual(values = c(15, 17)) +
   geom_errorbar(aes(ymin = MeanES - SEM, ymax = MeanES + SEM), colour = "grey15", alpha = 0.75, width = 0.2) +
-  stat_summary(aes(x=LipidIon,y=MeanES), fun=mean, geom = "point", size=3, shape=20, alpha = 0.75, colour = "grey15") +
+  stat_summary(aes(x=LipidIon.l,y=MeanES), fun=mean, geom = "point", size=3, shape=20, alpha = 0.75, colour = "grey15") +
   theme_classic() +
   theme(axis.text = element_text(colour = "black", size = 5.5), axis.text.x = element_text(angle = 0, vjust = 0.1)) +
   geom_hline(yintercept = 0, linetype = "dashed") +
   coord_flip() +
   labs(title = "Top 30% GPMV vs. In vitro", x = "", y = "Effect size (Old vs. Young)") +
-  geom_point(data = top30.GPMV.p %>%
-               filter(Sig == "Significant"),
-             aes(x = fct_reorder(LipidIon, MeanES), y = star.pos),
-             pch=8,
-             size=1.2, stroke = 0.7, alpha = 0.75,
-             colour="black") +
+  theme(axis.text.y = element_markdown(colour = "black", size = 6)) +
   theme(legend.position = "bottom")
-ggsave(filename = paste0("./Figure_Panels/Fig.3b.pdf"), width = 5, height = 5, useDingbats = FALSE)
+ggsave(filename = paste0("./Figure_Panels/Fig.4B.pdf"), width = 5, height = 5, useDingbats = FALSE)
 
 ## ==== highlight Mboat2 responsive lipids====
 load("./Output_Data/Mboat2.responsive_lipid_list.Rdata")
 
 gpmv.ovlp.ls <- unique(top30.GPMV.p$LipidIon)[unique(top30.GPMV.p$LipidIon) %in% res.lpd.ls]
 gpmv.ovlp.ls
+#[1] "LPC(O-18:1)"   "PE(16:0_16:0)" "PE(18:1_20:4)"

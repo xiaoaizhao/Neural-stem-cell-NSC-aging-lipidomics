@@ -53,4 +53,4 @@ a <- ggscatter(raw.SC.invivo.invitro, x = "SCsum.Invitro", y = "SCsum.Invivo",
 a+ facet_wrap(~Age)+
   theme(text = element_text(size = 12, face = "plain", colour = "black"))+
   theme(axis.text = element_text(size = 12, face = "plain", colour = "black"))
-ggsave(filename = "./Figure_Panels/EDFig.5e.pdf", width = 6, height = 6, useDingbats = FALSE)
+ggsave(filename = "./Figure_Panels/fig.S6E.pdf", width = 6, height = 6, useDingbats = FALSE)

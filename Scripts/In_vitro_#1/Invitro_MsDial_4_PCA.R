@@ -58,7 +58,7 @@ p+geom_point(
   labs(shape = "Cell Type", color = "Age")+
   theme(text=element_text(size = 13, face = "plain"))+
   ggtitle("In vitro") 
-ggsave(filename = "./Figure_Panels/Fig.1b.pdf", width = 5.5, height = 5, useDingbats=FALSE)
+ggsave(filename = "./Figure_Panels/Fig.1B.pdf", width = 5.5, height = 5, useDingbats=FALSE)
 
 
 ## ====Quiescent samples only====
@@ -102,5 +102,5 @@ p+geom_point(
   scale_shape_manual(values =c(17)) +
   theme(axis.text=element_text(colour="black"))
   
-ggsave(filename = "./Figure_Panels/Fig.1c.pdf", width = 5.5, height = 5, useDingbats=FALSE)
+ggsave(filename = "./Figure_Panels/Fig.1C.pdf", width = 5.5, height = 5, useDingbats=FALSE)
 

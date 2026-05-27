@@ -50,7 +50,7 @@ ggplot(perm_df, aes(x = sim, y = `Q2(cum)`)) +
   labs(x = "Similarity", y = "Q²", title = "Permutation Test Results") +
   theme_classic() +
   theme(axis.text = element_text(colour = "black"))
-ggsave(filename = "./Figure_Panels/EDFig.6d.pdf", width = 5, height = 5, useDingbats=FALSE)
+ggsave(filename = "./Figure_Panels/fig.S7D.pdf", width = 5, height = 5, useDingbats=FALSE)
 
 ### ====OPLS-DA====
 o1 = as.data.frame(Cell.oplsda@orthoScoreMN)
@@ -80,7 +80,7 @@ A + geom_point(aes( color = CellType), shape = 18, size = 4, alpha = 0.8)+
   ylab(paste0("Orthogonal Component 1: ", format(Cell.oplsda@modelDF["o1", "R2X"] * 100,
                                   digits = 3), " % variance")) +
   theme(legend.position = "bottom")
-ggsave(filename = "./Figure_Panels/EDFig.6c.pdf", width = 5, height = 5, useDingbats=FALSE)
+ggsave(filename = "./Figure_Panels/fig.S7C.pdf", width = 5, height = 5, useDingbats=FALSE)
 
 
 ##====OPLS-DA between young and old qNSCs from DESI====
@@ -129,7 +129,7 @@ ggplot(perm_df, aes(x = sim, y = `Q2(cum)`)) +
   geom_hline(yintercept = perm_df$`Q2(cum)`[perm_df$sim == 1], linetype = "dashed", color = "red") +
   labs(x = "Similarity", y = "Q²", title = "Permutation Test Results") +
   theme_classic()
-ggsave(filename = "./Figure_Panels/EDFig.6f.pdf", width = 5, height = 5, useDingbats=FALSE)
+ggsave(filename = "./Figure_Panels/fig.S7F.pdf", width = 5, height = 5, useDingbats=FALSE)
 
 ### ====OPLS-DA====
 o1 = as.data.frame(Q.DESI.pls@orthoScoreMN)
@@ -155,4 +155,4 @@ A + geom_point(aes( color = Age), shape = 18, size = 4, alpha = 0.8)+
   ylab(paste0("Orthogonal Component 1: ", format(Q.DESI.pls@modelDF["o1", "R2X"] * 100,
                                   digits = 3), " % variance")) +
   theme(legend.position = "bottom")
-ggsave(filename = "./Figure_Panels/EDFig.6e.pdf", width = 5, height = 5, useDingbats=FALSE)
+ggsave(filename = "./Figure_Panels/fig.S7E.pdf", width = 5, height = 5, useDingbats=FALSE)

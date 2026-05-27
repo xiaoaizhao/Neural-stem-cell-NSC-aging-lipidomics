@@ -36,7 +36,7 @@ d+
   theme(legend.position = "none") +
   ylim(0, max(chol.GPMV$Cholesterol+20))#+
   # geom_text_repel(aes(label = Sample))
-ggsave(filename = paste0("./Figure_Panels/EDFig.8h.pdf"), width = 3, height = 4, useDingbats = FALSE)
+ggsave(filename = paste0("./Figure_Panels/fig.S9H.pdf"), width = 3, height = 4, useDingbats = FALSE)
 
 chol.med <- chol.GPMV %>% 
   group_by(Age) %>% 

@@ -57,5 +57,5 @@ p+geom_point(aes(color= Age, shape = Exp), size=3, alpha=0.8, fill = "grey70", s
   scale_shape_manual(values =c(17,2)) +
   labs(title = "2 In vitro studies")
 
-ggsave("./Figure_Panels/EDFig.1e.pdf", width = 5.5, height = 5,
+ggsave("./Figure_Panels/fig.S1E.pdf", width = 5.5, height = 5,
        useDingbats=FALSE)

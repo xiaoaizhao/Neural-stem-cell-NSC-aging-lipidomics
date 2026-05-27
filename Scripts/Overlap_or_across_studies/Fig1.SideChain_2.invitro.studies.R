@@ -8,6 +8,7 @@ rm(list = ls())
 
 library(tidyverse)
 library(ggpubr)
+library(ggtext)
 source("./Scripts/Function_scripts/Effect_size_functions.R")
 load("./Output_Data/SC.abundance.MsD.Age.ES_Exp2_all_KO.Rdata") 
 load("./Output_Data/SC.abundance.Invitro_Qui_Age_ES.Rdata") 
@@ -84,95 +85,87 @@ p.c2.in.2lc.df$Sat <- factor(p.c2.in.2lc.df$Sat, levels = c("SFA", "MUFA", "PUFA
 db.c2.in.2lc <- p.c2.in.2lc.df
 
 sig.db.c2.in.2lc <- db.c2.in.2lc %>% 
-  filter(Sig == "Significant") #116 significant by CI95
+  filter(Sig == "Significant") %>%  #116 significant by CI95
+  mutate(Cla_SC.l = paste0(Cla_SC, "<b>*</b>"))
+
 
 nosig.db.c2.in.2lc <- db.c2.in.2lc %>% 
-  filter(!Sig == "Significant") #124 not significant
+  filter(!Sig == "Significant") %>%  #124 not significant
+  mutate(Cla_SC.l = Cla_SC)
 
 ## ==== Calculate p value based on CI ====
 sig.db.c2.in.2lc.pval <- pval.from.CI.SC(sig.db.c2.in.2lc, 0.05, 0) #116
 
 padj.sig.db. <- sig.db.c2.in.2lc.pval %>% 
   filter(padj < 0.05) %>% 
-  group_by(Cla_SC) %>% 
-  group_modify(~{
-    .x %>% 
-      mutate(star.pos = case_when(
-        MeanES > 0 ~  max(es_g) + 0.8, 
-        MeanES < 0 ~ min(es_g) - 0.8)
-      ) 
-  })
+  group_by(Cla_SC)
 
 all.db.p <- bind_rows(nosig.db.c2.in.2lc, padj.sig.db.)
 save(padj.sig.db., file = "./Output_Data/SC.2outof2LC.invitro.Padj.Sig.features.Rdata")
 
 
-a <-ggplot(all.db.p, aes(x = fct_reorder(Cla_SC, MeanES), y = es_g))
+a <-ggplot(all.db.p, aes(x = fct_reorder(Cla_SC.l, MeanES), y = es_g))
 a+
   geom_point(aes(shape = Exp), colour = "grey39", alpha = 0.85, size = 1.65, fill = "gold") +
   scale_shape_manual(values = c(17,2, 10)) +
   geom_errorbar(aes(ymin = MeanES - SEM, ymax = MeanES + SEM, color = Sat), alpha = 0.85, width = 0.2) +
-  stat_summary(aes(x=Cla_SC,y=MeanES, color = Sat), fun=mean, geom = "point", size=2, shape=20, alpha = 0.85) +
+  stat_summary(aes(x=Cla_SC.l,y=MeanES, color = Sat), fun=mean, geom = "point", size=2, shape=20, alpha = 0.85) +
   theme_classic() +
+  coord_flip() +
   theme(axis.text = element_text(colour = "black", size = 6), axis.text.x = element_text(angle = 0, vjust = 0.1)) +
   geom_hline(yintercept = 0, linetype = "dashed") +
   scale_color_manual(values = c("cornflowerblue", "yellowgreen", "firebrick3"))+
-  coord_flip() +
-  labs(title = "All DB 2 out of 2 LC in vitro", x = "", y = "Effect size (Old vs. Young)") +
-  geom_point(data = all.db.p %>%
-           filter(Sig == "Significant"),
-           aes(x = fct_reorder(Cla_SC, MeanES), y = star.pos),
-         pch=8,
-         size=0.9, stroke = 0.7, alpha = 0.75,
-         colour="black") +
+  labs(title = "All side chain 2 out of 2 LC in vitro", x = "", y = "Effect size (Old vs. Young)") +
+  theme(axis.text.y = element_markdown(colour = "black", size = 6)) +
   theme(legend.position = "bottom")
-ggsave(filename = "./Figure_Panels/EDFig.4b.pdf", width = 4, height = 10, useDingbats = FALSE)
+  
+   
+ggsave(filename = "./Figure_Panels/fig.S4B.pdf", width = 4, height = 10, useDingbats = FALSE)
 
 
 
 
-#### ==== All side chain features in the top 30% ====
-top30.all.hi <- all.db.p %>% 
+#### ==== All side chain features in the top 20% ====
+top20.all.hi <- all.db.p %>% 
   group_by(Cla_SC) %>% 
   summarise(MeanES = unique(MeanES)) %>% 
   mutate(percentile = percent_rank(MeanES)) %>% 
-  filter(percentile > 0.7) #38 side chain
-top30.all.lo <- all.db.p %>% 
+  filter(percentile > 0.8) #24 side chain
+top20.all.lo <- all.db.p %>% 
   filter(MeanES < 0) %>% 
   group_by(Cla_SC) %>% 
   summarise(MeanES = unique(MeanES)) %>% 
   mutate(percentile = percent_rank(MeanES)) %>% 
-  filter(percentile < 0.3) #11 lipids
-top30.all.ls <- c(top30.all.hi$Cla_SC, top30.all.lo$Cla_SC)
+  filter(percentile < 0.2) #7 lipids
+top20.all.ls <- c(top20.all.hi$Cla_SC, top20.all.lo$Cla_SC)
 
-top30.all.sc <- all.db.p %>% 
-  filter(Cla_SC %in% top30.all.ls)
+top20.all.sc <- all.db.p %>% 
+  filter(Cla_SC %in% top20.all.ls)
 
-a <-ggplot(top30.all.sc, aes(x = fct_reorder(Cla_SC, MeanES), y = es_g))
+a <-ggplot(top20.all.sc, aes(x = fct_reorder(Cla_SC.l, MeanES), y = es_g))
 a+
   geom_point(aes(shape = Exp), colour = "grey39", alpha = 0.85, size = 1.65, fill = "gold") +
   scale_shape_manual(values = c(17,2, 10)) +
   geom_errorbar(aes(ymin = MeanES - SEM, ymax = MeanES + SEM, color = Sat), alpha = 0.85, width = 0.2) +
-  stat_summary(aes(x=Cla_SC,y=MeanES, color = Sat), fun=mean, geom = "point", size=2, shape=20, alpha = 0.85) +
+  stat_summary(aes(x=Cla_SC.l,y=MeanES, color = Sat), fun=mean, geom = "point", size=2, shape=20, alpha = 0.85) +
   theme_classic() +
   theme(axis.text = element_text(colour = "black", size = 6), axis.text.x = element_text(angle = 0, vjust = 0.1)) +
   geom_hline(yintercept = 0, linetype = "dashed") +
   scale_color_manual(values = c("cornflowerblue", "yellowgreen", "firebrick3"))+
   coord_flip() +
-  labs(title = "Top 30 percentile All SC 2 in vitro", x = "", y = "Effect size (Old vs. Young)") +
-  geom_point(data = top30.all.sc %>%
-               filter(Sig == "Significant"),
-             aes(x = fct_reorder(Cla_SC, MeanES), y = star.pos),
-             pch=8,
-             size=0.7, stroke = 0.7, alpha = 0.75,
-             colour="black") +
-  theme(legend.position = "bottom")
-ggsave(filename = "./Figure_Panels/Fig.1f.pdf", width = 4, height = 8, useDingbats = FALSE)
+  labs(title = "Top 20 percentile All SC 2 in vitro", x = "", y = "Effect size (Old vs. Young)") +
+  theme(legend.position = "bottom") +
+  theme(axis.text.y = element_markdown(colour = "black", size = 6)) 
+ggsave(filename = "./Figure_Panels/Fig.1F.pdf", width = 4, height = 6, useDingbats = FALSE)
 
 
 ## ==== highlight Mboat2 responsive Side chains====
 load("./Output_Data/Mboat2.responsive_SideChain_list.Rdata")
 
-invitro.ovlp.ls <- unique(top30.all.sc$Cla_SC)[unique(top30.all.sc$Cla_SC) %in% res.SC.ls]
+invitro.ovlp.ls <- unique(top20.all.sc$Cla_SC)[unique(top20.all.sc$Cla_SC) %in% res.SC.ls]
 invitro.ovlp.ls
-# [1] "LPC(O-16:0)" "PE(20:4)"    "PE(20:5)"    "PE(O-18:1)"  "PI(20:5)"  
+# "PE(20:4)"   "PE(20:5)"   "PE(O-18:1)" "PI(20:5)"  
+
+invitro.ovlp.ls <- unique(all.db.p$Cla_SC)[unique(all.db.p$Cla_SC) %in% res.SC.ls]
+invitro.ovlp.ls
+# "LPC(O-16:0)" "PC(17:0)"    "PC(17:1)"    "PC(17:2)"    "PE(18:2)"    "PE(20:4)"    "PE(20:5)"    "PE(O-18:1)" "PI(20:5)"  

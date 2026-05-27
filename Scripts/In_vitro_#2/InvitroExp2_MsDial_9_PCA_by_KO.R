@@ -41,7 +41,7 @@ p+geom_point(size=3, alpha=0.8, shape = 2, stroke = 2)+
   scale_color_manual(values = pal4)+
   labs(title = "Primary culture #2 - controls")+
   theme(text=element_text(size = 13, face = "plain"))
-  ggsave(filename = "./Figure_Panels/EDFig.2.PCA.Exp2_control.pdf", width = 5, height = 5, useDingbats=FALSE)
+  ggsave(filename = "./Figure_Panels/fig.S2A_control.pdf", width = 5, height = 5, useDingbats=FALSE)
 
 #' 
 #' #### Control cell paired with each KO
@@ -89,6 +89,6 @@ for (ko.n in KO.ls) {
       labs(title = paste0(as.character(unique(df_out$group)), collapse = " "))+
       theme(text=element_text(size = 13, face = "plain")) +
       theme(axis.text=element_text(colour="black"))
-    ggsave(filename = paste0("./Figure_Panels/EDFig.2.PCA.Exp2_",paste0(as.character(unique(df_out$group)), collapse = "_"), ".pdf"), width = 5, height = 5, useDingbats=FALSE)
+    ggsave(filename = paste0("./Figure_Panels/fig.S2A_",paste0(as.character(unique(df_out$group)), collapse = "_"), ".pdf"), width = 5, height = 5, useDingbats=FALSE)
 }
 

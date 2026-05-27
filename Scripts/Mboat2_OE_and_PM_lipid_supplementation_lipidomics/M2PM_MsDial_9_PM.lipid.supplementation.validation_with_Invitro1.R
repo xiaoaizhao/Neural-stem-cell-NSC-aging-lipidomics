@@ -66,7 +66,7 @@ a+ geom_point(aes(color = Overall.cat), alpha = 0.95, size = 3)+
   labs(x = "", y = "Effect size GPMV vs. Whole cell") +
   geom_hline(yintercept = 0, linetype = "dashed") +
   facet_wrap(~Age)
-ggsave(filename = "./Figure_Panels/EDFig.12c.pdf", width = 6, height = 4)
+ggsave(filename = "./Figure_Panels/fig.S14C.pdf", width = 6, height = 4)
 
 #### ==== add pie chart to indicate what percentage of lipids are more abundant in GPMV vs. whole cell====####
 pie.df <- sup.val.p %>% 
@@ -102,5 +102,5 @@ a+  geom_bar(stat="identity", width = 1, color = "white") +
   facet_wrap(~Age)+
   theme_void()+
   theme(legend.position = "right")
-ggsave(filename = "./Figure_Panels/EDFig.12c.pie.pdf",
+ggsave(filename = "./Figure_Panels/fig.S14C.pie.pdf",
        width = 8, height = 4, useDingbats = FALSE)

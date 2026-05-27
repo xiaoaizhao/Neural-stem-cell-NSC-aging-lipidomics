@@ -51,5 +51,5 @@ p+geom_point(size=3, alpha=0.8, stroke = 1, aes(color = Age, shape = GPMV_sup))+
   scale_shape_manual(values = c(5, 14)) +
   labs(title = "GPMV lipid Supplementation")+
   theme(text=element_text(size = 13, face = "plain"))
- ggsave(filename = "./Figure_Panels/EDFig.12d.pdf", width = 5.5, height = 5, useDingbats=FALSE)
+ ggsave(filename = "./Figure_Panels/fig.S14D.pdf", width = 5.5, height = 5, useDingbats=FALSE)
  

@@ -71,35 +71,25 @@ nosig.ES <- all.ES.p.org %>%
   filter(!Sig == "Significant") #27
 
 lpd.DESI.all <- bind_rows(sig.ES, nosig.ES) %>% 
-  group_by(LipidIon) %>% 
-  group_modify(~{
-    .x %>% 
-      mutate(star.pos = case_when(
-        Sig == "Significant" & MeanES > 0 ~  max(Exp_es, na.rm = T) + 0.8, 
-        Sig == "Significant" & MeanES < 0 ~ min(Exp_es, na.rm = T) - 0.8)
-      )
-  })
+  mutate(LipidIon.l = ifelse(Sig == "Significant", 
+                             paste0(LipidIon, "<b>*</b>"), LipidIon))
 
 
-a <-ggplot(lpd.DESI.all, aes(x = fct_reorder(LipidIon, MeanES), y = Exp_es))
+a <-ggplot(lpd.DESI.all, aes(x = fct_reorder(LipidIon.l, MeanES), y = Exp_es))
 a+
   # geom_point(aes(shape = Experiment, color = Cat), alpha = 0.8, size = 3) +
   geom_point(aes(shape = Experiment, color = Cat), alpha = 0.85, size = 3.5) +
   scale_shape_manual(values = c(17, 25, 18)) + 
   geom_errorbar(aes(ymin = MeanES - SEM, ymax = MeanES + SEM), alpha = 0.75, width = 0.2, colour = "grey15",) +
-  stat_summary(aes(x=LipidIon,y=MeanES), fun=mean, geom = "point", size=6, shape=20, alpha = 0.75, colour = "grey15",) +
+  stat_summary(aes(x=LipidIon.l,y=MeanES), fun=mean, geom = "point", size=6, shape=20, alpha = 0.75, colour = "grey15",) +
   theme_classic() +
   theme(axis.text = element_text(colour = "black", size = 10)) +
   geom_hline(yintercept = 0, linetype = "dashed") +
   scale_color_manual(values = c("seagreen", "tan2"))+
   coord_flip() + 
   labs(title = "DESI vs. In vitro and In vivo LC-MS", x = "", y = "Effect size (Old vs. Young)") +
-  geom_point(data = lpd.DESI.all,
-             aes(x = fct_reorder(LipidIon, MeanES), y = star.pos),
-             pch=8, 
-             size=1.5, stroke = 0.7, alpha = 0.75,
-             colour="black") 
-ggsave(filename = "./Figure_Panels/Fig.2d.pdf", width = 5, height = 5, useDingbats = FALSE)
+  theme(axis.text.y = element_markdown(colour = "black", size = 6))
+ggsave(filename = "./Figure_Panels/Fig.3D.pdf", width = 5, height = 5, useDingbats = FALSE)
 
 ## ==== highlight Mboat2 responsive lipids====
 load("./Output_Data/Mboat2.responsive_lipid_list.Rdata")

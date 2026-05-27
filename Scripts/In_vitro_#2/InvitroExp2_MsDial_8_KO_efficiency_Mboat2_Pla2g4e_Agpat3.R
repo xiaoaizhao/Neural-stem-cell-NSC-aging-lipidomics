@@ -60,7 +60,7 @@ a+ geom_boxplot(outlier.shape = NA)+
         axis.text = element_text(colour = "black"))+
   stat_compare_means(aes(group = KO), label = "p.format", paired = TRUE)+
   theme(legend.position= "none")
-ggsave(filename = paste0("./Figure_Panels/EDFig.11b-c_", KO.name, "_",  
+ggsave(filename = paste0("./Figure_Panels/fig.S12B-S12C_", KO.name, "_",  
                          "substrate", ".pdf"), width = 3.5, height = 5, useDingbats=FALSE)
 
 #Plot product level
@@ -73,7 +73,7 @@ a+ geom_boxplot(outlier.shape = NA)+
   theme(text=element_text(size = 10, face = "bold"))+
   stat_compare_means(aes(group = KO), label = "p.format", paired = TRUE)+
   theme(legend.position= "none")
-ggsave(filename = paste0("./Figure_Panels/EDFig.11b-c_", KO.name, "_",  
+ggsave(filename = paste0("./Figure_Panels/fig.S12B-S12C_", KO.name, "_",  
                          "product", ".pdf"), width = 3.5, height = 5, useDingbats=FALSE)
 
 ## -------------------------------------------------------------------------------------------------------------------
@@ -122,7 +122,7 @@ a+ geom_boxplot(outlier.shape = NA)+
         axis.text = element_text(colour = "black"))+
   stat_compare_means(aes(group = KO), label = "p.format", paired = TRUE)+
   theme(legend.position= "none")
-ggsave(filename = paste0("./Figure_Panels/EDFig.11b-c_", KO.name, "_",  
+ggsave(filename = paste0("./Figure_Panels/fig.S12B-S12C_", KO.name, "_",  
                          "substrate", ".pdf"), width = 3.5, height = 5, useDingbats=FALSE)
 
 #Plot product level
@@ -135,5 +135,5 @@ a+ geom_boxplot(outlier.shape = NA)+
   theme(text=element_text(size = 10, face = "bold"))+
   stat_compare_means(aes(group = KO), label = "p.format", paired = TRUE)+
   theme(legend.position= "none")
-ggsave(filename = paste0("./Figure_Panels/EDFig.11b-c_", KO.name, "_",  
+ggsave(filename = paste0("./Figure_Panels/fig.S12B-S12C_", KO.name, "_",  
                          "product", ".pdf"), width = 3.5, height = 5, useDingbats=FALSE)

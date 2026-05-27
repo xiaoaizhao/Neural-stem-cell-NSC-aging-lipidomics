@@ -3,7 +3,6 @@
 rm(list = ls())
 library(tidyverse)
 library(ggpubr)
-library(patchwork)
 setwd(rstudioapi::getActiveProject())
 source("./Scripts/Function_scripts/Pre-processing_functions.R")
 M2.LUT <- c("#938b72", "#E15759")
@@ -57,7 +56,7 @@ a+ geom_boxplot(outlier.shape = NA)+
   theme(legend.position= "none")+
   ylim(0, max(M.df$LPE_16_0_conc_int) + 0.0001) +
   theme(axis.text = element_text(colour = "black"))
-ggsave(filename = "./Figure_Panels/EDFig.11i.left.pdf", width = 3.5, height = 5, useDingbats=FALSE)
+ggsave(filename = "./Figure_Panels/fig.S12I.left.pdf", width = 2, height = 5, useDingbats=FALSE)
 
 #Plot product level
 b<- ggplot(M.df, aes(x= factor(Condition), y= PE_16_0_all, colour= Condition)) 
@@ -71,7 +70,7 @@ b+ geom_boxplot(outlier.shape = NA)+
   theme(legend.position= "none") +
   ylim(0, max(M.df$PE_16_0_all) + 0.01) +
   theme(axis.text = element_text(colour = "black"))
-ggsave(filename = "./Figure_Panels/EDFig.11i.middle.pdf", width = 3.5, height = 5, useDingbats=FALSE)
+ggsave(filename = "./Figure_Panels/fig.S12I.middle.pdf", width = 2, height = 5, useDingbats=FALSE)
 
 #Plot ratio between substrate to product
 c<- ggplot(M.df, aes(x= factor(Condition), y= PE_LPE_ratio, colour= Condition)) 
@@ -84,4 +83,4 @@ c+ geom_boxplot(outlier.shape = NA)+
   stat_compare_means(aes(group = Condition), label = "p.format", paired = TRUE, method = "wilcox.test")+
   theme(legend.position= "none") +
   theme(axis.text = element_text(colour = "black"))
-ggsave(filename = "./Figure_Panels/EDFig.11i.right.pdf", width = 3.5, height = 5, useDingbats=FALSE)
+ggsave(filename = "./Figure_Panels/fig.S12I.right.pdf", width = 2, height = 5, useDingbats=FALSE)

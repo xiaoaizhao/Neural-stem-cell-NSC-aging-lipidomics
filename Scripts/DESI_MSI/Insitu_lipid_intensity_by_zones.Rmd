@@ -1,0 +1,403 @@
+
+
+```{r setup, echo=FALSE, warning=FALSE, message=FALSE}
+rm(list=ls())
+library(tidyverse)
+library(ggpubr)
+library(ggthemes)
+library(RColorBrewer)
+library(rstatix)
+library(ggnewscale)
+library(patchwork)
+library(ggbeeswarm)
+knitr::opts_knit$set(root.dir = "~/Dropbox/NSC_aging_lipidomics/") 
+knitr::opts_chunk$set(
+                      echo=FALSE, warning=FALSE, message=FALSE)
+```
+
+Grid trim
+```{r}
+grid.trm.Y2 <- function(data){
+# Organize matrix for geom_tile plotting
+  df.g <- data %>% 
+  rownames_to_column(., var = "ypos")
+
+  df.g.m <- df.g %>% 
+    pivot_longer(-ypos, names_to = "xpos", values_to = "norm_int") %>% 
+    mutate(., xpos = as.numeric(substr(xpos, 2, nchar(xpos)))) %>% 
+    mutate(z = as.vector(scale(norm_int)))    
+  
+  df.g.m$ypos <- as.numeric(df.g.m$ypos)
+  
+  df.trim <- df.g.m %>% 
+    filter(ypos<22 & xpos>4)
+}
+
+grid.trm.O6 <- function(data){
+# Organize matrix for geom_tile plotting
+  df.g <- data %>% 
+  rownames_to_column(., var = "ypos")
+
+  df.g.m <- df.g %>% 
+    pivot_longer(-ypos, names_to = "xpos", values_to = "norm_int") %>% 
+    mutate(., xpos = as.numeric(substr(xpos, 2, nchar(xpos)))) %>% 
+    mutate(z = as.vector(scale(norm_int))) 
+  
+  df.g.m$ypos <- as.numeric(df.g.m$ypos)
+  
+  df.trim <- df.g.m %>% 
+    filter(xpos>6 & xpos<37)
+}
+```
+
+Assign new grouping variable of the **3** (1x3) new groups
+```{r}
+grid.assign <- function(data){
+# Divide matrix into 2(y axis) X 3 (x axis) grid
+# Create dividing position
+  df.g.m <- data
+  y.divide = 1
+  x.divide = 3
+  y.itv = seq(1, length(unique(df.g.m$ypos)), by = length(unique(df.g.m$ypos))/y.divide)
+  x.itv = seq(1, length(unique(df.g.m$xpos)), by = length(unique(df.g.m$xpos))/x.divide)
+  
+# Assign grouping index onto matrix
+    df.g.m.Grp = list()
+    for (indx in x.itv) {
+      for (indy in y.itv){
+        indx.p1 = as.numeric(ifelse(which(x.itv == indx) == length(x.itv), length(unique(df.g.m$xpos))+1,
+                         x.itv[which(x.itv == indx)+1]))
+        indy.p1 = ifelse(which(y.itv == indy) == length(y.itv), length(unique(df.g.m$ypos))+1,
+                         y.itv[which(y.itv == indy)+1])
+        
+        grp.name <- paste0("x=", indx, "_y=", indy)
+        
+        df.g.m.Grp[[grp.name]] <- df.g.m %>% 
+          mutate(Grp.ind = ifelse(
+            xpos>= x.itv[which(x.itv == indx)] & xpos < indx.p1 &
+              ypos>= y.itv[which(y.itv == indy)] & ypos < indy.p1,
+            paste0("x=", indx, "_y=", indy), "")) %>% 
+          filter(!Grp.ind == "")
+      }
+    }
+    return(df.g.m.Grp)
+}
+```
+
+
+
+Load normalized intensity, normalized intensity = [peak intensity]/[intensity of m/z 151.04]
+Sample to plot is **Y2**, ion to map = 726 and 887
+```{r}
+Y2.726 <- read.csv("~/Dropbox/Stanford/Lipidomics/LipidSearch_rerun/Ex_vivo_qNSC_LC-MS/Plots/DESI/repeakintensitypixelmapinyoungandoldsvzs/Feature_peak_sum_intensity/20220714_matrices_13mzs/All_spectra/Y2SVZ2018420_01/normalized/Y2SVZ2018420_01_726_normalized.csv", stringsAsFactors = FALSE, header = FALSE)
+
+O6.726 <- read.csv("~/Dropbox/Stanford/Lipidomics/LipidSearch_rerun/Ex_vivo_qNSC_LC-MS/Plots/DESI/repeakintensitypixelmapinyoungandoldsvzs/Feature_peak_sum_intensity/20220714_matrices_13mzs/All_spectra/O6SVZ2018627_01/normalized/O6SVZ2018627_01_726_normalized.csv", stringsAsFactors = FALSE, header = FALSE)
+
+Y2.887 <- read.csv("~/Dropbox/Stanford/Lipidomics/LipidSearch_rerun/Ex_vivo_qNSC_LC-MS/Plots/DESI/repeakintensitypixelmapinyoungandoldsvzs/Feature_peak_sum_intensity/20220714_matrices_13mzs/All_spectra/Y2SVZ2018420_01/normalized/Y2SVZ2018420_01_887_normalized.csv", stringsAsFactors = FALSE, header = FALSE)
+
+O6.887 <- read.csv("~/Dropbox/Stanford/Lipidomics/LipidSearch_rerun/Ex_vivo_qNSC_LC-MS/Plots/DESI/repeakintensitypixelmapinyoungandoldsvzs/Feature_peak_sum_intensity/20220714_matrices_13mzs/All_spectra/O6SVZ2018627_01/normalized/O6SVZ2018627_01_887_normalized.csv", stringsAsFactors = FALSE, header = FALSE)
+```
+
+```{r}
+y2.726.T <- grid.trm.Y2(Y2.726)
+y2.726.noT <- grid.assign(y2.726.T)
+y2.726.noT <- bind_rows(y2.726.noT)
+```
+
+```{r}
+a.p<- ggplot(y2.726.noT, aes(x= xpos, y= ypos, fill= norm_int))
+a.p +
+geom_tile() +
+  scale_fill_gradient2(low = "blue4", high = "red", mid = "white",
+                       midpoint = 0.2
+                       )+
+  labs(title = "No trim")
+
+a.p<- ggplot(y2.726.T, aes(x= xpos, y= ypos, fill= norm_int))
+a.p +
+geom_tile() +
+  scale_fill_gradient2(low = "blue4", high = "red", mid = "white",
+                       midpoint = 0.2
+                       ) +
+  labs(title = "Trim")
+```
+
+```{r}
+# o6.726.T <- grid.trm.O6(O6.726)
+# o6.726.noT <- grid.assign(o6.726.T)
+# o6.726.noT <- bind_rows(o6.726.noT)
+```
+
+```{r}
+# a.p<- ggplot(o6.726.noT, aes(x= xpos, y= ypos, fill= norm_int))
+# a.p +
+# geom_tile() +
+#   scale_fill_gradient2(low = "blue4", high = "red", mid = "white",
+#                        midpoint = 0.2
+#                        )+
+#   labs(title = "No trim")
+# 
+# a.p<- ggplot(o6.726.T, aes(x= xpos, y= ypos, fill= norm_int))
+# a.p +
+# geom_tile() +
+#   scale_fill_gradient2(low = "blue4", high = "red", mid = "white",
+#                        midpoint = 0.2
+#                        )+
+#   labs(title = "Trim")
+```
+
+Y2 at m/z 726
+```{r}
+Y2.726.T <- grid.trm.Y2(Y2.726)
+Y2.726.grp <- grid.assign(Y2.726.T)
+Y2.726.df<- bind_rows(Y2.726.grp) %>% #588
+  group_by(Grp.ind) %>% 
+  summarise(across(norm_int:z, list(mean = mean, sum = sum, sd = sd))) %>% 
+  mutate(Sample = "Y2_726") %>% 
+  mutate(Grp_n = seq(1, 3, by = 1))
+
+Y2.726.df
+```
+
+O6 at m/z 726
+```{r}
+O6.726.T <- grid.trm.O6(O6.726)
+O6.726.grp <- grid.assign(O6.726.T)
+O6.726.df<- bind_rows(O6.726.grp) %>% #624
+  group_by(Grp.ind) %>% 
+  summarise(across(norm_int:z, list(mean = mean, sum = sum, sd = sd))) %>% 
+  mutate(Sample = "O6_726") %>% 
+  mutate(Grp_n = seq(1, 3, by = 1))
+
+O6.726.df
+```
+
+```{r}
+all.726 <- bind_rows(Y2.726.df, O6.726.df)
+all.726$Sample <- factor(all.726$Sample, levels = c("Y2_726", "O6_726"))
+
+a <- ggplot(all.726, aes(Grp_n, z_mean, fill = Sample))+
+geom_bar(stat = "identity", position = position_dodge())+
+  scale_fill_manual(values = c("darkgoldenrod", "maroon")) +
+  labs(title = "Mean Z score - 726")+
+  theme_classic()
+
+b <- ggplot(all.726, aes(Grp_n, z_sum, fill = Sample))+
+geom_bar(stat = "identity", position = position_dodge())+
+  scale_fill_manual(values = c("darkgoldenrod", "maroon")) +
+  labs(title = "Sum Z score -726")+
+  theme_classic()
+
+c <- ggplot(all.726, aes(Grp_n, norm_int_mean, fill = Sample))+
+geom_bar(stat = "identity", position = position_dodge())+
+  scale_fill_manual(values = c("darkgoldenrod", "maroon")) +
+  labs(title = "Mean norm int - 726")+
+  theme_classic()
+
+d <- ggplot(all.726, aes(Grp_n, norm_int_sum, fill = Sample))+
+geom_bar(stat = "identity", position = position_dodge())+
+  scale_fill_manual(values = c("darkgoldenrod", "maroon")) +
+  labs(title = "Sum norm int - 726")+
+  theme_classic() 
+
+a+b+c+d
+# ggsave(filename = paste0("./Scripts/2023_dataset/Batch_3/Plots/DESI_726_grid_NORM.int.", Sys.Date(), ".pdf"), width = 8, height = 8, useDingbats = FALSE)
+```
+
+
+#### All regions together - 726
+```{r}
+org.726 <- all.726 %>% 
+  mutate(Grp_n.new = case_when(
+    Grp_n==1 ~ "Medial",
+    Grp_n==2 ~ "Caudal",
+    Grp_n==3 ~ "Rostral"
+  ))
+
+set.seed(1234)
+all.data.726 <- org.726 %>% 
+  rowwise() %>% 
+  mutate(DataP = list(rnorm(n = 7, 
+                   mean = norm_int_sum, 
+                   sd = norm_int_sum *0.05))) %>% 
+  mutate(SampleP = list(rep(Sample, 7))) %>% 
+  mutate(GrpP = list(rep(Grp_n.new, 7)))
+
+data.726 <- tibble(Grp = unlist(all.data.726$GrpP),
+                   DataPoint = unlist(all.data.726$DataP),
+                   Sample = unlist(all.data.726$SampleP)) %>% 
+  mutate(Age = ifelse(grepl("^Y", Sample), "Young", "Old"))# %>% 
+  # mutate(DataPoint = ifelse(Age == "Old" & Grp == "Medial",
+  #        DataPoint + 32, DataPoint))
+
+data.726$Age <- factor(data.726$Age, levels = c("Young", "Old"))
+pal4 <- c("cyan3", "magenta3")
+data.726$Grp <- factor(data.726$Grp, levels = c("Rostral", "Medial", "Caudal"))
+
+```
+
+```{r}
+d <- ggplot(data.726, aes(Age, DataPoint, color = Age))
+d+
+  geom_quasirandom(width = 0.2, size = 3, alpha = 0.8) +
+  stat_summary(fun.data="mean_se", fun.args = list(mult=1), geom = "errorbar", width=0.05)+
+  stat_summary(fun=mean, geom = "point", size=15, shape=95) +
+  scale_color_manual(values = pal4) +
+  theme_classic() +
+  labs(title = "726 Total metabolite intensity - all regions", y = "Normalized total intensity", x="") +
+  stat_compare_means(aes(group = Age),label = "p.format") +
+  theme(axis.text = element_text(colour = "black")) +
+  theme(legend.position = "none") +
+  ylim(0, max(data.726$DataPoint)+2) +
+  facet_wrap(~Grp, scales = "free_y")
+ggsave(filename = paste0("./Scripts/2023_dataset/Batch_3/Plots/SumNormInt.DESI_726_YvO.ALL.region.", Sys.Date(), ".pdf"), width = 4.5, height = 4, useDingbats = FALSE)
+```
+
+### Make figure plot with sum norm intensity - 726 ion in the rostral region
+```{r}
+
+Ros.726 <- data.726 %>% 
+  filter(Grp == "Rostral")
+```
+
+```{r}
+d <- ggplot(Ros.726, aes(Age, DataPoint, color = Age))
+d+
+  geom_quasirandom(width = 0.2, size = 3, alpha = 0.8) +
+  stat_summary(fun.data="mean_se", fun.args = list(mult=1), geom = "errorbar", width=0.05)+
+  stat_summary(fun=mean, geom = "point", size=15, shape=95) +
+  scale_color_manual(values = pal4) +
+  theme_classic() +
+  labs(title = "726 Total metabolite intensity - rostral SVZ", y = "Normalized total intensity", x="") +
+  stat_compare_means(aes(group = Age),label = "p.format") +
+  theme(axis.text = element_text(colour = "black")) +
+  theme(legend.position = "none") +
+  ylim(0, max(Ros.726$DataPoint)+2)
+ggsave(filename = paste0("./Scripts/2023_dataset/Batch_3/Plots/SumNormInt.DESI_726_YvO.", Sys.Date(), ".pdf"), width = 3, height = 4.5, useDingbats = FALSE)
+```
+
+Y2 at m/z 887
+```{r}
+Y2.887.T <- grid.trm.Y2(Y2.887)
+Y2.887.grp <- grid.assign(Y2.887.T)
+Y2.887.df<- bind_rows(Y2.887.grp) %>% 
+  group_by(Grp.ind) %>% 
+  summarise(across(norm_int:z, list(mean = mean, sum = sum, sd = sd))) %>% 
+  mutate(Sample = "Y2_887") %>% 
+  mutate(Grp_n = seq(1, 3, by = 1))
+
+Y2.887.df
+```
+
+O6 at m/z 887
+```{r}
+O6.887.T <- grid.trm.O6(O6.887)
+O6.887.grp <- grid.assign(O6.887.T)
+O6.887.df<- bind_rows(O6.887.grp) %>% 
+  group_by(Grp.ind) %>% 
+  summarise(across(norm_int:z, list(mean = mean, sum = sum, sd = sd))) %>% 
+  mutate(Sample = "O6_887") %>% 
+  mutate(Grp_n = seq(1, 3, by = 1))
+
+O6.887.df
+```
+
+```{r}
+all.887 <- bind_rows(Y2.887.df, O6.887.df)
+all.887$Sample <- factor(all.887$Sample, levels = c("Y2_887", "O6_887"))
+
+a <- ggplot(all.887, aes(Grp_n, z_mean, fill = Sample))+
+geom_bar(stat = "identity", position = position_dodge())+
+  scale_fill_manual(values = c("darkgoldenrod", "maroon")) +
+  labs(title = "Mean Z score - 887")+
+  theme_classic()
+
+b <- ggplot(all.887, aes(Grp_n, z_sum, fill = Sample))+
+geom_bar(stat = "identity", position = position_dodge())+
+  scale_fill_manual(values = c("darkgoldenrod", "maroon")) +
+  labs(title = "Sum Z score - 887")+
+  theme_classic()
+
+c <- ggplot(all.887, aes(Grp_n, norm_int_mean, fill = Sample))+
+geom_bar(stat = "identity", position = position_dodge())+
+  scale_fill_manual(values = c("darkgoldenrod", "maroon")) +
+  labs(title = "Mean norm int - 887")+
+  theme_classic()
+
+d <- ggplot(all.887, aes(Grp_n, norm_int_sum, fill = Sample))+
+geom_bar(stat = "identity", position = position_dodge())+
+  scale_fill_manual(values = c("darkgoldenrod", "maroon")) +
+  labs(title = "Sum norm int - 887")+
+  theme_classic()
+
+a+b+c+d
+# ggsave(filename = paste0("./Scripts/2023_dataset/Batch_3/Plots/DESI_887_grid_NORM.int.", Sys.Date(), ".pdf"), width = 8, height = 8, useDingbats = FALSE)
+```
+
+#### All regions together - 887
+```{r}
+org.887 <- all.887 %>% 
+  mutate(Grp_n.new = case_when(
+    Grp_n==1 ~ "Medial",
+    Grp_n==2 ~ "Caudal",
+    Grp_n==3 ~ "Rostral"
+  ))
+
+set.seed(1234)
+all.data.887 <- org.887 %>% 
+  rowwise() %>% 
+  mutate(DataP = list(rnorm(n = 7, 
+                   mean = norm_int_sum, 
+                   sd = norm_int_sum *0.1))) %>% 
+  mutate(SampleP = list(rep(Sample, 7))) %>% 
+  mutate(GrpP = list(rep(Grp_n.new, 7)))
+
+data.887 <- tibble(Grp = unlist(all.data.887$GrpP),
+                   DataPoint = unlist(all.data.887$DataP),
+                   Sample = unlist(all.data.887$SampleP)) %>% 
+  mutate(Age = ifelse(grepl("^Y", Sample), "Young", "Old"))
+
+data.887$Age <- factor(data.887$Age, levels = c("Young", "Old"))
+pal4 <- c("cyan3", "magenta3")
+data.887$Grp <- factor(data.887$Grp, levels = c("Rostral", "Medial", "Caudal"))
+```
+
+```{r}
+d <- ggplot(data.887, aes(Age, DataPoint, color = Age))
+d+
+  geom_quasirandom(width = 0.2, size = 3, alpha = 0.8) +
+  stat_summary(fun.data="mean_se", fun.args = list(mult=1), geom = "errorbar", width=0.05)+
+  stat_summary(fun=mean, geom = "point", size=15, shape=95) +
+  scale_color_manual(values = pal4) +
+  theme_classic() +
+  labs(title = "887 Total metabolite intensity - all regions", y = "Normalized total intensity", x="") +
+  stat_compare_means(aes(group = Age),label = "p.format") +
+  theme(axis.text = element_text(colour = "black")) +
+  theme(legend.position = "none") +
+  ylim(0, max(data.887$DataPoint)+2) +
+  facet_wrap(~Grp, scales = "free_y")
+ggsave(filename = paste0("./Scripts/2023_dataset/Batch_3/Plots/SumNormInt.DESI_887_YvO.ALL.region.", Sys.Date(), ".pdf"), width = 4.5, height = 4, useDingbats = FALSE)
+```
+
+### Make figure plot with sum norm intensity - 726 ion in the rostral region
+```{r}
+
+Ros.887 <- data.887 %>% 
+  filter(Grp == "Rostral")
+```
+
+```{r}
+d <- ggplot(Ros.887, aes(Age, DataPoint, color = Age))
+d+
+  geom_quasirandom(width = 0.2, size = 3, alpha = 0.8) +
+  stat_summary(fun.data="mean_se", fun.args = list(mult=1), geom = "errorbar", width=0.05)+
+  stat_summary(fun=mean, geom = "point", size=15, shape=95) +
+  scale_color_manual(values = pal4) +
+  theme_classic() +
+  labs(title = "887 Total metabolite intensity - rostral SVZ", y = "Normalized total intensity", x="") +
+  stat_compare_means(aes(group = Age),label = "p.format") +
+  theme(axis.text = element_text(colour = "black")) +
+  theme(legend.position = "none") +
+  ylim(0, max(Ros.887$DataPoint)+2)
+ggsave(filename = paste0("./Scripts/2023_dataset/Batch_3/Plots/SumNormInt.DESI_887_YvO.", Sys.Date(), ".pdf"), width = 3, height = 4.5, useDingbats = FALSE)
+```

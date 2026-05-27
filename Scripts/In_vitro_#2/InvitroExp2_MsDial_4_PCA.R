@@ -41,7 +41,7 @@ p+geom_point(aes(shape = factor(age)), size=4, alpha=0.9)+
   scale_shape_manual(values =c(16, 17)) +
   labs(title = "PCA In vitro #2")+
   theme(text=element_text(size = 13, face = "plain"))
-ggsave(filename = "./Figure_Panels/Fig.4c.pdf", width = 5.7, height = 5, useDingbats=FALSE)
+ggsave(filename = "./Figure_Panels/Fig.6C.pdf", width = 5.7, height = 5, useDingbats=FALSE)
 
 ####==== PCA on Mboat2 KO====
 rm(list = ls())
@@ -84,4 +84,4 @@ p+
   labs(title = paste0(as.character(unique(df_out$group)), collapse = " "))+
   theme(text=element_text(size = 13, face = "plain")) +
   theme(axis.text=element_text(colour="black"))
-ggsave(filename = "./Figure_Panels/Fig.4d.pdf", width = 5, height = 5, useDingbats=FALSE)
+ggsave(filename = "./Figure_Panels/Fig.6D.pdf", width = 5, height = 5, useDingbats=FALSE)

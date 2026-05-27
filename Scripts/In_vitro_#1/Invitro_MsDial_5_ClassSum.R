@@ -60,7 +60,7 @@ b+geom_bar(aes(fill=Class),
   theme_classic() +
   theme(axis.text = element_text(colour = "black")) +
   facet_wrap(~CellType)
-ggsave(filename = "./Figure_Panels/EDFig.1a.pdf", width = 5.5, height = 5, useDingbats=FALSE)
+ggsave(filename = "./Figure_Panels/fig.S1A.pdf", width = 5.5, height = 5, useDingbats=FALSE)
 
 
 ## ==== class pct after removing Cholesterol qNSC only==== ============================================================================
@@ -115,4 +115,4 @@ b+geom_bar(aes(fill=Class),
   guides(fill=guide_legend(title="Class")) +
   theme_classic() +
   theme(axis.text = element_text(colour = "black")) 
-ggsave(filename = "./Figure_Panels/EDFig.1c.left.pdf", width = 5, height = 5, useDingbats = FALSE)
+ggsave(filename = "./Figure_Panels/fig.S1C.left.pdf", width = 5, height = 5, useDingbats = FALSE)

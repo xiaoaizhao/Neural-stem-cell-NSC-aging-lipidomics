@@ -65,7 +65,7 @@ Up.in.Ctrl <- list(
   Agpat3 = paste0(KO.A[[1]]$LipidIon, "_upinCtrl"),
   Pla2g4e = paste0(KO.P[[1]]$LipidIon, "_upinCtrl"))
 
-pdf(file= "./Figure_Panels/EDFig.11d.bottom.up.in.ctrl.pdf", onefile=FALSE)
+pdf(file= "./Figure_Panels/fig.S12D.bottom.up.in.ctrl.pdf", onefile=FALSE)
 upset(fromList(Up.in.Ctrl),nsets = 6,  order.by = c("freq"), 
       sets.bar.color = "#4E6172", 
       mb.ratio = c(0.65, 0.35), 
@@ -81,7 +81,7 @@ Up.in.KO <- list(
   Agpat3 = paste0(KO.A[[2]]$LipidIon, "_upinKO"),
   Pla2g4e = paste0(KO.P[[2]]$LipidIon, "_upinKO"))
 
-pdf(file= "./Figure_Panels/EDFig.11d.top.up.in.ko.pdf", onefile=FALSE)
+pdf(file= "./Figure_Panels/fig.S12D.top.up.in.ko.pdf", onefile=FALSE)
 upset(fromList(Up.in.KO),nsets = 6,  order.by = c("freq"), 
       sets.bar.color = "#4E6172", 
       mb.ratio = c(0.65, 0.35), 

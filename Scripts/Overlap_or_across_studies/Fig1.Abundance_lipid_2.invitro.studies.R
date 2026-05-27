@@ -71,7 +71,7 @@ a+
   theme(axis.text = element_text(colour = "black", size = 10)) +
   labs(x = "", y = "Lipid mol%") +
   geom_hline(yintercept = median(Invitro$Mean.mol.pct), linetype = "dashed")
-ggsave(paste0("./Figure_Panels/EDFig.1f.invitro_1.pdf"), width = 5, height = 5)
+ggsave(paste0("./Figure_Panels/fig.S1G.invitro_1.pdf"), width = 5, height = 5)
 
 ## ==== Plot in vitro Exp #2 next ====
 exp2 <- all2 %>% 
@@ -105,4 +105,4 @@ a+
   theme(axis.text = element_text(colour = "black", size = 10)) +
   labs(x = "", y = "Lipid mol%") +
   geom_hline(yintercept = median(exp2$Mean.mol.pct), linetype = "dashed")
-ggsave(paste0("./Figure_Panels/EDFig.1f.invitro_2.pdf"), width = 5, height = 5)
+ggsave(paste0("./Figure_Panels/fig.S1G.invitro_2.pdf"), width = 5, height = 5)

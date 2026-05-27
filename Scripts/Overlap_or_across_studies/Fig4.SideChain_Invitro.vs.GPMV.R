@@ -56,14 +56,6 @@ c2of2all.p <- inner_join(ovlp.db.E3GPMV, DB.GPMV.vs.Exp3.CI.LoUp, by = "Cla_SC")
                       ))) %>% 
   mutate(Sig = ifelse( CI.lower > 0 & CI.upper > 0 | CI.lower < 0 & CI.upper < 0,
                        "Significant", "Not significant")) %>% 
-  group_by(Cla_SC) %>% 
-  group_modify(~{
-    .x %>% 
-      mutate(star.pos = case_when(
-        Sig == "Significant" & MeanES > 0 ~  max(`Effect size`) + 0.8, 
-        Sig == "Significant" & MeanES < 0 ~ min(`Effect size`) - 0.8)
-      )
-  }) %>% 
   mutate(Exp = case_when(
     grepl("Exp3", Exp) ~ "In vitro",
     grepl("GPMV", Exp) ~ "GPMV",
@@ -83,13 +75,9 @@ GPMV.Exp3.DB <- pval.from.CI.SC.summary(sig.DB, 0.05, 0) #78
 GPMV.padj.sig <- GPMV.Exp3.DB %>% 
   filter(padj < 0.05) %>% #78
   group_by(Cla_SC) %>% 
-  group_modify(~{
-    .x %>% 
-      mutate(star.pos = case_when(
-        MeanES > 0 ~  max(`Effect size`) + 0.3, 
-        MeanES < 0 ~ min(`Effect size`) - 0.3)
-      ) 
-  })
+  mutate(Cla_SC.l = ifelse(Sig == "Significant", 
+                           paste0(Cla_SC, "<b>*</b>"), Cla_SC))
+
 SC.sig.GPMV.invitro <- unique(GPMV.padj.sig$Cla_SC)
 save(SC.sig.GPMV.invitro, file = "./Output_Data/FDR.sig.SC_GPMV_Invitro.Rdata")
 ### ==== get side chain feature of the top 30% ====
@@ -107,25 +95,20 @@ top30.df.lo <- GPMV.padj.sig %>%
 top30.ls <- c(top30.df.hi$Cla_SC, top30.df.lo$Cla_SC)
 save(top30.ls, file = "./Output_Data/FDR.sig.SC_GPMV_Invitro.top30.pct.Rdata")
 ### ==== plot FDR significant ones for main figure ==== ####
-a <-ggplot(GPMV.padj.sig, aes(x = fct_reorder(Cla_SC, MeanES), y = `Effect size`))
+a <-ggplot(GPMV.padj.sig, aes(x = fct_reorder(Cla_SC.l, MeanES), y = `Effect size`))
 a+
   geom_point(aes(shape = Exp), colour = "grey39", alpha = 0.85, size = 3) +
   scale_shape_manual(values = c(15, 17)) + 
   geom_errorbar(aes(ymin = MeanES - SEM, ymax = MeanES + SEM, color = Sat), alpha = 0.85, width = 0.3, size = 1) +
-  stat_summary(aes(x=Cla_SC,y=MeanES), fun=mean, geom = "point", size=3, shape=20, alpha = 0.85, colour = "grey15") +
+  stat_summary(aes(x=Cla_SC.l,y=MeanES), fun=mean, geom = "point", size=3, shape=20, alpha = 0.85, colour = "grey15") +
   theme_classic() +
   theme(axis.text = element_text(colour = "black", size = 8), axis.text.x = element_text(angle = 0, vjust = 0.1)) +
   geom_hline(yintercept = 0, linetype = "dashed") +
   scale_color_manual(values = c("cornflowerblue", "yellowgreen", "firebrick3"))+
   coord_flip() + 
   labs(title = "SC GPMV vs. Exp3 FDR sig", x = "", y = "Effect size (Old vs. Young)") +
-  geom_point(data = GPMV.padj.sig %>% 
-               filter(Sig == "Significant"), 
-             aes(x = fct_reorder(Cla_SC, MeanES), y = star.pos),
-             pch=8, 
-             size=1.5, stroke = 0.7, alpha = 0.75,
-             colour="black") 
-ggsave(filename = paste0("./Figure_Panels/Fig.3c.pdf"), width = 5, height = 5, useDingbats = FALSE)
+  theme(axis.text.y = element_markdown(colour = "black", size = 6))
+ggsave(filename = paste0("./Figure_Panels/Fig.4C.pdf"), width = 5, height = 5, useDingbats = FALSE)
 
 
 ## ==== highlight Mboat2 responsive Side chains====
@@ -138,33 +121,23 @@ gpmv.ovlp.ls
 
 ### ==== plot all overlapping DB for extended figure ==== ####
 padj.ls <-GPMV.padj.sig %>% 
-  select(Cla_SC, Exp, padj)
-SC.all <- left_join(c2of2all.p, padj.ls, by = c("Cla_SC", "Exp")) %>% 
-  group_by(Cla_SC) %>% 
-  group_modify(~{
-    .x %>% 
-      mutate(star.pos = ifelse(padj < 0.05, case_when(
-        MeanES > 0 ~  max(`Effect size`) + 0.8, 
-        MeanES < 0 ~ min(`Effect size`) - 0.8), NA
-      )) 
-  }) 
+  select(Cla_SC, Exp, padj, Cla_SC.l)
+SC.all <- c2of2all.p %>% 
+  mutate(Cla_SC.l = ifelse(Sig == "Significant", 
+                           paste0(Cla_SC, "<b>*</b>"), Cla_SC))
 
-a <-ggplot(SC.all, aes(x = fct_reorder(Cla_SC, MeanES), y = `Effect size`))
+a <-ggplot(SC.all, aes(x = fct_reorder(Cla_SC.l, MeanES), y = `Effect size`))
 a+
-  geom_point(aes(shape = Exp), colour = "grey39", alpha = 0.85, size = 3) +
+  geom_point(aes(shape = Exp), colour = "grey39", alpha = 0.85, size = 2) +
   scale_shape_manual(values = c(15, 17)) + 
-  geom_errorbar(aes(ymin = MeanES - SEM, ymax = MeanES + SEM, color = Sat), alpha = 0.85, width = 0.5, size = 1) +
-  stat_summary(aes(x=Cla_SC,y=MeanES), fun=mean, geom = "point", size=3, shape=20, alpha = 0.85, colour = "grey15") +
+  geom_errorbar(aes(ymin = MeanES - SEM, ymax = MeanES + SEM, color = Sat), alpha = 0.85, width = 0.5, size = 0.5) +
+  stat_summary(aes(x=Cla_SC.l,y=MeanES), fun=mean, geom = "point", size=2, shape=20, alpha = 0.85, colour = "grey15") +
   theme_classic() +
   theme(axis.text = element_text(colour = "black", size = 6), axis.text.x = element_text(angle = 0, vjust = 0.1)) +
   geom_hline(yintercept = 0, linetype = "dashed") +
   scale_color_manual(values = c("cornflowerblue", "yellowgreen", "firebrick3"))+
   coord_flip() + 
   labs(title = "GPMV vs. Exp3 All SC", x = "", y = "Effect size (Old vs. Young)") +
-  geom_point(data = SC.all %>% 
-               filter(Sig == "Significant"), 
-             aes(x = fct_reorder(Cla_SC, MeanES), y = star.pos),
-             pch=8, 
-             size=1.5, stroke = 0.7, alpha = 0.75,
-             colour="black") 
-ggsave(filename = paste0("./Figure_Panels/EDFig.8f.pdf"), width = 4, height = 10, useDingbats = FALSE)
+  theme(axis.text.y = element_markdown(colour = "black", size = 6))+
+  theme(legend.position = "bottom")
+ggsave(filename = paste0("./Figure_Panels/fig.S9F.pdf"), width = 4, height = 16, useDingbats = FALSE)

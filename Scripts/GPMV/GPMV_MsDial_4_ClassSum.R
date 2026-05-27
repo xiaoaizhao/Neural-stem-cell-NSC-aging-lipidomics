@@ -58,6 +58,6 @@ b+geom_bar(aes(fill=Class),
   guides(fill=guide_legend(title="Class")) +
   theme_classic() +
   theme(axis.text = element_text(colour = "black")) 
-ggsave(filename = "./Figure_Panels/EDFig.8b.pdf", width = 5, height = 5, useDingbats = FALSE)
+ggsave(filename = "./Figure_Panels/fig.S9B.pdf", width = 5, height = 5, useDingbats = FALSE)
 
 

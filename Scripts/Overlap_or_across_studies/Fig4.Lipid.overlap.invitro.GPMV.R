@@ -30,7 +30,7 @@ Invitro.v.GPMV<- list(
 
 
 ## Venn diagram
-pdf(file=paste0("./Figure_Panels/EDFig.8c_left.pdf"), onefile=FALSE)
+pdf(file=paste0("./Figure_Panels/fig.S9C_left.pdf"), onefile=FALSE)
 p1 <- euler(Invitro.v.GPMV)
 plot(p1, fills = c("#d9e8e5",  "#E5E5E5"), 
      quantities = TRUE, legend = FALSE)
@@ -141,7 +141,7 @@ b+geom_bar(aes(fill=Label),
   theme_classic() +
   theme(axis.text = element_text(colour = "black")) +
   facet_wrap(~Exp)
-ggsave(filename = "./Figure_Panels/EDFig.8c.middle.pdf", width = 5, height = 5, useDingbats = FALSE)
+ggsave(filename = "./Figure_Panels/fig.S9C.middle.pdf", width = 5, height = 5, useDingbats = FALSE)
 
 
 ## ----------------------------------------------------------------------------------------------------------------------------------
@@ -177,7 +177,7 @@ GPMV.Invitro.up<- list(
 
 
 ## Venn diagram
-pdf(file=paste0("./Figure_Panels/EDFig.8c_right-middle.pdf"), onefile=FALSE)
+pdf(file=paste0("./Figure_Panels/fig.S9C_right-middle.pdf"), onefile=FALSE)
 p1 <- euler(GPMV.Invitro.up)
 plot(p1, fills = c("#d9e8e5",  "#E5E5E5"), 
      quantities = TRUE, legend = FALSE) #78
@@ -192,7 +192,7 @@ GPMV.Invitro.down<- list(
 
 
 ## Venn diagram
-pdf(file=paste0("./Figure_Panels/EDFig.8c_right.pdf"), onefile=FALSE)
+pdf(file=paste0("./Figure_Panels/fig.S9C_right.pdf"), onefile=FALSE)
 p1 <- euler(GPMV.Invitro.down)
 plot(p1, fills = c("#d9e8e5",  "#E5E5E5"), 
      quantities = TRUE, legend = FALSE) #46

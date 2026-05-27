@@ -51,6 +51,6 @@ p+geom_point(size=3, alpha=0.8, stroke = 2, aes(color = Age, shape = OE_cond))+
   scale_shape_manual(values = c(5, 7)) +
   labs(title = "Mboat2 OE")+
   theme(text=element_text(size = 13, face = "plain"))
-ggsave(filename =paste0("./Figure_Panels/Fig.4h.pdf"), width = 5.2, height = 5, useDingbats=FALSE)
+ggsave(filename =paste0("./Figure_Panels/Fig.7B.pdf"), width = 5.2, height = 5, useDingbats=FALSE)
 
 

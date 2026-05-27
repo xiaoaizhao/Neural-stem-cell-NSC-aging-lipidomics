@@ -8,7 +8,7 @@ source("./Scripts/Function_scripts/Effect_size_functions.R")
 source("./Scripts/Function_scripts/Pre-processing_functions.R")
 ##====Plotting function====
 heatmap.plot <- function(plot.df, dataset){
-  pdf(paste0("./Figure_Panels/EDFig.2.",dataset, ".pdf"), width =5, height =5)
+  pdf(paste0("./Figure_Panels/fig.S2.",dataset, ".pdf"), width =5, height =5)
   set.seed(12345)
   HM.2 <- Heatmap(plot.df, name = "z score", 
                   cluster_rows = TRUE,

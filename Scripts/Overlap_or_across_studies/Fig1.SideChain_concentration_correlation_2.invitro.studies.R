@@ -55,4 +55,4 @@ a <- ggscatter(raw.SC.2.invitro, x = "Log2Invitro", y = "Log2Invitro_Exp2",
 a+ facet_wrap(~Age)+
   theme(text = element_text(size = 12, face = "plain", colour = "black"))+
   theme(axis.text = element_text(size = 12, face = "plain", colour = "black"))
-ggsave(filename = "./Figure_Panels/EDFig.4a.pdf", width = 6, height = 6, useDingbats = FALSE)
+ggsave(filename = "./Figure_Panels/fig.S4A.pdf", width = 6, height = 6, useDingbats = FALSE)

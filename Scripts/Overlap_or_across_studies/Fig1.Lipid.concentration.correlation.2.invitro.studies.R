@@ -72,5 +72,5 @@ a <- ggscatter(Conc.corr.2.invitro, x = ("Log2_Invitro_Conc_avg"), y = ("Log2_In
           xlab = "Log2 uM concentration (In vitro)", ylab = "Log2 uM concentration (In vitro Experiment #2)"
          )
 a + facet_wrap(~Age)
-ggsave(filename = "./Figure_Panels/EDFig.1d.pdf", width = 6, height = 6, useDingbats = FALSE)
+ggsave(filename = "./Figure_Panels/fig.S1D.pdf", width = 6, height = 6, useDingbats = FALSE)
 

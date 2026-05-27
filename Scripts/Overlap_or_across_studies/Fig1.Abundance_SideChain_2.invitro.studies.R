@@ -78,7 +78,7 @@ a+
   labs(x = "", y = "Log2 side chain concentration (uM) in respective class") +
   facet_wrap(~Exp,  nrow = 1)
 
-ggsave(filename = "./Figure_Panels/EDFig.4c.pdf", width = 6, height = 5, useDingbats = FALSE)
+ggsave(filename = "./Figure_Panels/fig.S4C.pdf", width = 6, height = 5, useDingbats = FALSE)
 
 t <- LC2 %>% 
   filter(Sig.lbl == "Significant") %>% 

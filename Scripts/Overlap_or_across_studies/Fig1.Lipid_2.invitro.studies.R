@@ -4,6 +4,7 @@ setwd(rstudioapi::getActiveProject())
 rm(list = ls())
 library(tidyverse)
 library(ggpubr)
+library(ggtext)
 
 source("./Scripts/Function_scripts/Effect_size_functions.R")
 source("./Scripts/Function_scripts/Pre-processing_functions.R")
@@ -101,7 +102,8 @@ p.c2.in.2lc.df <- left_join(c2.in.2lc.df, c2.in.2lc.lpd.CI.LoUp, by = "LipidIon"
          "Significant", "Not significant"))
 
 sig.2of2lc <- p.c2.in.2lc.df %>% 
-   filter(Sig == "Significant") #160
+  filter(Sig == "Significant") %>% #160
+  mutate(LipidIon.l = paste0(LipidIon, "<b>*</b>"))
 
 non.sig <- p.c2.in.2lc.df %>% 
   filter(Sig == "Not significant") #190
@@ -113,36 +115,72 @@ sig.2of2lc$Exp <- factor(sig.2of2lc$Exp, levels = c( "In vitro", "In vitro Exper
 df.2of2.pval.CI.t <- pval.from.CI(sig.2of2lc, 0.05, 0) ## 160 entries
 
 lpd.c2.in.2lc.df.sig.t.final <- df.2of2.pval.CI.t %>% 
-  filter(padj < 0.05) %>% 
-  group_by(LipidIon) %>% 
-  group_modify(~{
-    .x %>% 
-      mutate(star.pos = case_when(
-        MeanES > 0 ~  max(es_g) + 0.8, 
-        MeanES < 0 ~ min(es_g) - 0.8)
-      ) 
-  }) #160 entires - this means all p value significant lipids are also FDR significant
+  filter(padj < 0.05) #160 entires - this means all p value significant lipids are also FDR significant
 
 save(lpd.c2.in.2lc.df.sig.t.final, file = "./Output_Data/Lipids.2of2LC.invitro.FDRSig.features.final.Rdata") 
 
-a <-ggplot(lpd.c2.in.2lc.df.sig.t.final, aes(x = fct_reorder(LipidIon, MeanES), y = es_g))
+#### ==== Top 30% significant (by FDR) lipids to plot in main figure ====
+top30.all.hi <- lpd.c2.in.2lc.df.sig.t.final %>% 
+  group_by(LipidIon) %>% 
+  summarise(MeanES = unique(MeanES)) %>% 
+  mutate(percentile = percent_rank(MeanES)) %>% 
+  filter(percentile > 0.7) #24 lipids
+top30.all.lo <- lpd.c2.in.2lc.df.sig.t.final %>% 
+  filter(MeanES < 0) %>% 
+  group_by(LipidIon) %>% 
+  summarise(MeanES = unique(MeanES)) %>% 
+  mutate(percentile = percent_rank(MeanES)) %>% 
+  filter(percentile < 0.3) #6 lipids
+top30.all.ls <- c(top30.all.hi$LipidIon, top30.all.lo$LipidIon)
+
+top30.all.lpd <- lpd.c2.in.2lc.df.sig.t.final %>% 
+  filter(LipidIon %in% top30.all.ls)
+
+top30.lpd.stat <- lpd.c2.in.2lc.df.sig.t.final %>% 
+  filter(LipidIon %in% top30.all.ls)
+
+
+a <-ggplot(top30.all.lpd, aes(x = fct_reorder(LipidIon.l, MeanES), y = es_g))
 a+
   geom_point(aes(shape = Exp), colour = "grey39", alpha = 0.85, size = 2, fill = "gold") +
   scale_shape_manual(values = c(17,2, 10)) + 
   geom_errorbar(aes(ymin = MeanES - SEM, ymax = MeanES + SEM), colour = "grey15", alpha = 0.75, width = 0.2) +
-  stat_summary(aes(x=LipidIon,y=MeanES), fun=mean, geom = "point", size=2, shape=20, alpha = 0.75, colour = "grey15") +
+  stat_summary(aes(x=LipidIon.l,y=MeanES), fun=mean, geom = "point", size=2, shape=20, alpha = 0.75, colour = "grey15") +
+  theme_classic() +
+  theme(axis.text = element_text(colour = "black", size = 7.5), axis.text.x = element_text(angle = 0, vjust = 0.1)) +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  coord_flip() + 
+  labs(title = "Top 30% Significant in 2 in vitro studies", x = "", y = "Effect size (Old vs. Young)") +
+  theme(axis.text.y = element_markdown(colour = "black", size = 6))+
+  theme(legend.position = "bottom")
+ggsave(filename = paste0("./Figure_Panels/Fig.1E.pdf"), width =4, height = 6, useDingbats = FALSE)
+
+a <-ggplot(lpd.c2.in.2lc.df.sig.t.final, aes(x = fct_reorder(LipidIon.l, MeanES), y = es_g))
+a+
+  geom_point(aes(shape = Exp), colour = "grey39", alpha = 0.85, size = 2, fill = "gold") +
+  scale_shape_manual(values = c(17,2, 10)) + 
+  geom_errorbar(aes(ymin = MeanES - SEM, ymax = MeanES + SEM), colour = "grey15", alpha = 0.75, width = 0.2) +
+  stat_summary(aes(x=LipidIon.l,y=MeanES), fun=mean, geom = "point", size=2, shape=20, alpha = 0.75, colour = "grey15") +
   theme_classic() +
   theme(axis.text = element_text(colour = "black", size = 7.5), axis.text.x = element_text(angle = 0, vjust = 0.1)) +
   geom_hline(yintercept = 0, linetype = "dashed") +
   coord_flip() + 
   labs(title = "Significant in 2 in vitro studies", x = "", y = "Effect size (Old vs. Young)") +
-  geom_point(data = lpd.c2.in.2lc.df.sig.t.final %>% 
-               filter(Sig == "Significant"), 
-             aes(x = fct_reorder(LipidIon, MeanES), y = star.pos),
-             pch=8, 
-             size=0.8, stroke = 0.7, alpha = 0.75,
-             colour="black") +
+  theme(axis.text.y = element_markdown(colour = "black", size = 6)) +
   theme(legend.position = "bottom")
-ggsave(filename = paste0("./Figure_Panels/Fig.1e.pdf"), width =4, height = 8.5, useDingbats = FALSE)
+ggsave(filename = paste0("./Figure_Panels/fig.S1F.pdf"), width =4, height = 8.5, useDingbats = FALSE)
 
 
+## ==== highlight Mboat2 responsive Side chains====
+load("./Output_Data/Mboat2.responsive_lipid_list.Rdata")
+
+# in Top 30 lipids
+invitro.ovlp.ls <- unique(top30.all.lpd$LipidIon)[unique(top30.all.lpd$LipidIon) %in% res.lpd.ls]
+invitro.ovlp.ls
+# [1] "LPC(O-16:0)"   "PC(16:0_22:5)" "PE(18:1_20:4)"
+
+# in all significant lipids
+invitro.ovlp.ls <- unique(lpd.c2.in.2lc.df.sig.t.final$LipidIon)[unique(lpd.c2.in.2lc.df.sig.t.final$LipidIon) %in% res.lpd.ls]
+invitro.ovlp.ls
+#  [1] "LPC(O-16:0)"     "LPC(O-18:1)"     "PC(16:0_17:1)"   "PC(16:0_22:5)"   "PC(17:0_18:1)"   "PC(17:1_18:1)"   "PC(O-18:1_22:6)"
+# [8] "PE(16:0_16:0)"   "PE(18:0_22:6)"   "PE(18:1_18:2)"   "PE(18:1_20:4)"  
